@@ -17,7 +17,7 @@
   <link href="css/cover.css" rel="stylesheet">
 
   <script src="js/papaparse.min.js"></script>
-  <script src="js/dropzone.min.js"></script>  
+  <script src="js/dropzone.min.js"></script>
   <script src="js/convert.js"></script>
 </head>
 
@@ -39,10 +39,10 @@
           <h1 class="cover-heading">Convert</h1>
           <p class="lead">Convert rabobank bank statements from CSV to YNAB format</p>
           <p class="lead">
-            <form action="/file-upload" class="dropzone" id="dropzone">
+            <form action="file-upload" class="dropzone" id="dropzone">
               <div class="fallback">
                 <input type="file" id="file" name="file" multiple onchange="parse()" />
-              <output id="list"></output>
+                <output id="list"></output>
               </div>
             </form>
           </p>
