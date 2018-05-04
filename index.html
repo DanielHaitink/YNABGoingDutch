@@ -17,6 +17,7 @@
   <link href="/css/cover.css" rel="stylesheet">
 
   <script src="/js/papaparse.min.js"></script>
+  <script src="/js/dropzone.min.js"></script>  
   <script src="/js/convert.js"></script>
 </head>
 
@@ -38,8 +39,12 @@
           <h1 class="cover-heading">Convert</h1>
           <p class="lead">Convert rabobank bank statements from CSV to YNAB format</p>
           <p class="lead">
-            <input type="file" id="file" name="file" multiple onchange="parse()" />
-            <output id="list"></output>
+            <form action="/file-upload" class="dropzone" id="dropzone">
+              <div class="fallback">
+                <input type="file" id="file" name="file" multiple onchange="parse()" />
+              <output id="list"></output>
+              </div>
+            </form>
           </p>
         </div>
 
@@ -60,9 +65,6 @@
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
     crossorigin="anonymous"></script>
-  <script>
-    window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')
-  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
     crossorigin="anonymous"></script>
   <script src="/js/bootstrap.min.js"></script>
