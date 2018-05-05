@@ -15,10 +15,8 @@
 
   <!-- Custom styles for this template -->
   <link href="css/cover.css" rel="stylesheet">
-
-  <script src="js/papaparse.min.js"></script>
-  <script src="js/dropzone.min.js"></script>
-  <script src="js/convert.js"></script>
+  <link rel="stylesheet" href="css/dropzone.css" />
+  <link rel="stylesheet" href="css/toastr.css" />
 </head>
 
 <body>
@@ -28,16 +26,9 @@
     <div class="site-wrapper-inner">
 
       <div class="cover-container">
-
-        <div class="masthead clearfix">
-          <div class="inner">
-            <h3 class="masthead-brand">Cover</h3>
-          </div>
-        </div>
-
         <div class="inner cover" id="drop-zone">
-          <h1 class="cover-heading">Convert</h1>
-          <p class="lead">Convert rabobank bank statements from CSV to YNAB format</p>
+          <h1 class="cover-heading">RABO converter</h1>
+          <p class="lead">Converts your rabobank bank statements from Rabo CSV to YNAB CSV format</p>
           <p class="lead">
             <form action="file-upload" class="dropzone" id="dropzone">
               <div class="fallback">
@@ -50,7 +41,7 @@
 
         <div class="mastfoot">
           <div class="inner">
-            <p></p>
+            <p>Find the source on <a href="https://github.com/DanielsWrath/RABO">GitHub</a></p>
           </div>
         </div>
 
@@ -63,11 +54,16 @@
   <!-- Bootstrap core JavaScript
     ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/papaparse.min.js"></script>
+  <script src="js/dropzone/dropzone.min.js"></script>
+  <script src="js/toastr/toastr.min.js"></script>
+  <script src="js/convert.js"></script>
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
     crossorigin="anonymous"></script>
-  <script src="js/bootstrap.min.js"></script>
+  <script src="js/bootstrap/bootstrap.min.js"></script>
 </body>
 
 </html>

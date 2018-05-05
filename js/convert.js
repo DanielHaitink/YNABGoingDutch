@@ -14,6 +14,7 @@ parseFile = function (file) {
             converter.errorHandle(error, file);
         },
         complete: function (results, file) {
+            toastr.success(file.name + " was succesfully parsed");
             converter.complete(results);
         }
     });
@@ -21,14 +22,27 @@ parseFile = function (file) {
 
 Dropzone.options.dropzone = {
     paramName: "file",
+    clickable: true,
+    uploadMultiple: true,
+    ignoreHiddenFiles: true,
     accept: function (file, done) {
         if (file.name.endsWith(".csv")) {
+            // TODO: check if file is succesfully parsed
             parseFile(file);
+            this.removeFile(file);
             done();
         } else {
+            toastr.error(file.name + " was not parsed");
+            this.removeFile(file);
             done("Could not parse file " + file.name);
         }
-    }
+    },
+    acceptedMimeTypes: "text/csv",
+    dictDefaultMessage: "Drag your csv's here or click here to select from your drive",
+    complete: function(file) {
+        this.removeFile(file);
+    },
+    addRemoveLinks: false
 };
 
 parse = () => {
