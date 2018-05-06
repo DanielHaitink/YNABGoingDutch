@@ -38,7 +38,7 @@ Dropzone.options.dropzone = {
         }
     },
     acceptedMimeTypes: "text/csv",
-    dictDefaultMessage: "Drag your csv's here or click here to select from your drive",
+    dictDefaultMessage: "Drag csv's here or click here to select the files from your device",
     complete: function(file) {
         this.removeFile(file);
     },
