@@ -120,7 +120,7 @@ StreamConverter = function () {
         let income, outcome = "0";
 
         if (amount.startsWith('-'))
-            outcome = amount;
+            outcome = amount.replace('-', '');
         else
             income = amount.replace('+', '')
 
