@@ -39,7 +39,7 @@ Dropzone.options.dropzone = {
     },
     acceptedMimeTypes: "text/csv",
     dictDefaultMessage: "Drag csv's here or click here to select the files from your device",
-    complete: function(file) {
+    complete: function (file) {
         this.removeFile(file);
     },
     addRemoveLinks: false
@@ -92,6 +92,79 @@ AccountData = function (accountNumber) {
             }
         }
     };
+};
+
+BankMapping = function () {
+    field = function (fieldList, splitBefore = null, splitAfter = null) {
+        getFields = function (line) {
+            returnLine = "";
+
+            for (let index = 0, field; field = fieldList[index]; ++index) {
+                returnLine += field;
+            }
+
+            return returnLine;
+        };
+
+        getLine = function (line) {
+            let text = getFields(line);
+            if (splitAfter)
+                text = text.split(splitAfter, 1)[1];
+            if (splitBefore)
+                text = text.split(splitBefore, 1)[0];
+            return text;
+        };
+    };
+
+    const DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
+
+    const mappings = {
+        rabo = {
+            date: new field(["Datum"]),
+            dateFormat: "YYYY-MM-DD",
+            payee: new field(["Naam Tegenpartij"]),
+            category: new field([]),
+            memo: new field(["Omschrijving-1", "Omschrijving-2", "Omschrijving-3"]),
+            outflow: new field(["Bedrag"]),
+            inflow: new field(["Bedrag"]),
+            positiveIndicator: "+",
+            negativeIndicator: "-"
+        },
+        ing = {
+            date: new field(["Datum"]),
+            dateFormat: "YYYYMMDD",
+            payee: new field(["Mededelingen"]),
+            category: new field([]),
+            memo: new field(["Mededelingen"]),
+            outflow: new field(["Bedrag"]),
+            inflow: new field(["Bedrag"]),
+            positiveIndicator: "Bij",
+            negativeIndicator: "Af",
+            seperateIndicator: ["Af Bij"]
+        }
+    };
+
+    getDate = function(line, bank) {
+        dateField = mappings[bank].date;
+        text = dateField.getLine(line);
+        dateFormat = mappings[bank].dateFormat;
+
+        if dateFormat == 
+        
+        let year, month, day = "";
+        for (let i = 0, letter; letter = text[i]; ++i) {
+            switch(letter) {
+                case "Y":
+                    year += letter;
+                case "M":
+                    month += letter;
+                case "D":
+                    day += letter;
+            }
+        }
+
+    };
+
 };
 
 StreamConverter = function () {
