@@ -94,32 +94,42 @@ AccountData = function (accountNumber) {
     };
 };
 
-BankMapping = function () {
-    field = function (fieldList, splitBefore = null, splitAfter = null) {
-        getFields = function (line) {
-            returnLine = "";
+field = function (fieldList, splitAfter, splitBefore) {
+    this.fieldList = fieldList;
+    this.splitAfter = splitAfter;
+    this.splitBefore = splitBefore;
 
-            for (let index = 0, field; field = fieldList[index]; ++index) {
-                returnLine += field;
-            }
+    getFields = function (line) {
+        returnLine = "";
 
-            return returnLine;
-        };
+        for (let index = 0, field; field = this.field.fieldList[index]; ++index) {
+            console.log(line);
+            console.log(field);
+            console.log(returnLine);
+            returnLine += line[field];
+        }
 
-        getLine = function (line) {
-            let text = getFields(line);
-            if (splitAfter)
-                text = text.split(splitAfter, 1)[1];
-            if (splitBefore)
-                text = text.split(splitBefore, 1)[0];
-            return text;
-        };
+        return returnLine;
     };
 
+    this.getLine = function (line) {
+        let text = getFields(line);
+        if (this.splitAfter)
+            text = text.split(this.splitAfter, 1)[1];
+        if (this.splitBefore)
+            text = text.split(this.splitBefore, 1)[0];
+
+        console.log(text);
+        return text;
+    };
+};
+
+BankMapping = function (bank) {
     const DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
 
     const mappings = {
-        rabo = {
+        RABO: {
+            account: new field(["IBAN/BBAN"]),
             date: new field(["Datum"]),
             dateFormat: "YYYY-MM-DD",
             payee: new field(["Naam Tegenpartij"]),
@@ -128,47 +138,120 @@ BankMapping = function () {
             outflow: new field(["Bedrag"]),
             inflow: new field(["Bedrag"]),
             positiveIndicator: "+",
-            negativeIndicator: "-"
+            negativeIndicator: "-",
+            seperateIndicator: null
         },
-        ing = {
+        ING: {
+            account: new field(["Rekening"]),
             date: new field(["Datum"]),
             dateFormat: "YYYYMMDD",
-            payee: new field(["Mededelingen"]),
+            payee: new field(["Naam / Omschrijving"]),
             category: new field([]),
-            memo: new field(["Mededelingen"]),
+            memo: new field(["Mededelingen"], "Omschrijving: ", " IBAN:"),
             outflow: new field(["Bedrag"]),
             inflow: new field(["Bedrag"]),
             positiveIndicator: "Bij",
             negativeIndicator: "Af",
-            seperateIndicator: ["Af Bij"]
+            seperateIndicator: new field(["Af Bij"])
         }
     };
 
-    getDate = function(line, bank) {
-        dateField = mappings[bank].date;
-        text = dateField.getLine(line);
-        dateFormat = mappings[bank].dateFormat;
+    this.getAccount = function (line) {
+        console.log(bank);
+        console.log(mappings);
+        return mappings[bank].account.getLine(line);
+    }
 
-        if dateFormat == 
-        
-        let year, month, day = "";
-        for (let i = 0, letter; letter = text[i]; ++i) {
-            switch(letter) {
+    this.getDate = function (line) {
+        const dateField = mappings[bank].date;
+        const text = dateField.getLine(line);
+        const dateFormat = mappings[bank].dateFormat;
+
+        if (dateFormat == DEFAULT_DATE_FORMAT)
+            return text;
+
+        let year = "", month = "", day = "";
+        for (let i = 0, letter; letter = dateFormat[i]; ++i) {
+            switch (letter) {
                 case "Y":
-                    year += letter;
+                    year += text[i];
                 case "M":
-                    month += letter;
+                    month += text[i];
                 case "D":
-                    day += letter;
+                    day += text[i];
             }
         }
 
+        return year + "-" + month + "-" + day;
     };
 
+    this.getPayee = function (line) {
+        return mappings[bank].payee.getLine(line);
+    };
+
+    this.getCategory = function (line) {
+        return "";
+    };
+
+    this.getMemo = function (line) {
+        return mappings[bank].memo.getLine(line);
+    };
+
+    isIndicatorPositive = function (indicatorField) {
+        console.log(indicatorField);
+        if (indicatorField.contains(mappings[bank].positiveIndicator))
+            return true;
+        return false;
+    };
+
+    this.getInflow = function (line) {
+        const bankMap = mappings[bank];
+        let value = bankMap.inflow.getLine(line);
+        let indicator = value;
+
+        if (bankMap.seperateIndicator != null)
+            indicator = bankMap.seperateIndicator.getLine(line);
+
+        if (isIndicatorPositive(indicator)) {
+            if (bankMap.seperateIndicator != null)
+                value = value.replace(bankMap.positiveIndicator, "");
+            return value;
+        }
+
+        return "0";
+    };
+
+    this.getOutflow = function (line) {
+        const bankMap = mappings[bank];
+        let value = bankMap.outflow.getLine(line);
+        let indicator = value;
+        console.log(bankMap.outflow);
+        console.log(indicator);
+        console.log(mappings[bank]);
+
+        if (bankMap.seperateIndicator != null)
+            indicator = bankMap.seperateIndicator.getLine(line);
+
+        if (!isIndicatorPositive(indicator)) {
+            if (bankMap.seperateIndicator != null)
+                value = value.replace(bankMap.negativeIndicator, "");
+            if (value.startsWith("-"))
+                value = value.replace("-", "");
+            return value;
+        }
+
+        return "0";
+    };
 };
+
+BankMapping.RABO = "RABO";
+BankMapping.ING = "ING";
 
 StreamConverter = function () {
     const accounts = {};
+    const map = new BankMapping(BankMapping.RABO);
+    console.log(map);
+    console.log(BankMapping.RABO);
 
     isErrorIndex = function (index, errors) {
         if (errors[index] != null)
@@ -185,40 +268,22 @@ StreamConverter = function () {
         }
     };
 
-    parseDescription = function (line) {
-        return '\"' + line["Omschrijving-1"] + line["Omschrijving-2"] + line["Omschrijving-3"] + '\"';
-    };
-
-    parseInOutCome = function (amount) {
-        let income, outcome = "0";
-
-        if (amount.startsWith('-'))
-            outcome = amount.replace('-', '');
-        else
-            income = amount.replace('+', '')
-
-        return {
-            outcome: outcome,
-            income: income
-        }
-    };
-
     this.convertLine = function (line) {
-        if (accounts[line["IBAN/BBAN"]] == null)
-            accounts[line["IBAN/BBAN"]] = new AccountData(line["IBAN/BBAN"]);
+        const account = map.getAccount(line);
 
-        const inOutCome = parseInOutCome(line["Bedrag"]);
+        if (accounts[account] == null)
+            accounts[account] = new AccountData(account);
 
         const dataRow = [
-            line["Datum"],
-            line["Naam tegenpartij"],
-            "",
-            parseDescription(line),
-            inOutCome["outcome"],
-            inOutCome["income"]
+            map.getDate(line),
+            map.getPayee(line),
+            map.getCategory(line),
+            map.getMemo(line),
+            map.getOutflow(line),
+            map.getInflow(line)
         ];
 
-        accounts[line["IBAN/BBAN"]].addLine(dataRow);
+        accounts[account].addLine(dataRow);
     };
 
     this.errorHandle = function (error, file) {
