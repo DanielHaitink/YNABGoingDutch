@@ -8,12 +8,12 @@
   <meta name="author" content="Daniël Haitink">
   <link rel="icon" href="img/favicon.ico">
 
-  <title>RABO converter</title>
+  <title>YNAB converter</title>
 
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/cover.css">
   <link rel="stylesheet" href="css/dropzone.css" />
-  <link rel="stylesheet" href="css/toastr.css" />
+  <link rel="stylesheet" href="css/toastr.min.css" />
 </head>
 
 <body>
@@ -24,8 +24,8 @@
 
       <div class="cover-container">
         <div class="inner cover" id="drop-zone">
-          <h1 class="cover-heading">RABO converter</h1>
-          <p class="lead">Converts your rabobank bank statements from Rabo CSV to YNAB CSV format</p>
+          <h1 class="cover-heading">YNAB converter</h1>
+          <p class="lead">Converts your Dutch bank statements from their CSV to YNAB CSV format</p>
           <p class="lead">
             <form action="file-upload" class="dropzone" id="dropzone">
               <div class="fallback">
@@ -33,6 +33,9 @@
                 <output id="list"></output>
               </div>
             </form>
+          </p>
+          <p>
+            Supported: RaboBank, ING
           </p>
         </div>
 

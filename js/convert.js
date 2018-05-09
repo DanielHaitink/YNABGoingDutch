@@ -119,6 +119,10 @@ const Field = function (fieldList, splitAfter, splitBefore) {
 };
 
 const BankMapping = function (bank) {
+    this.getBank = () => {
+        return bank;
+    }
+
     this.getAccount = function (line) {
         return BankMapping.mappings[bank].account.getLine(line);
     }
@@ -286,7 +290,7 @@ StreamConverter = function () {
     this.convert = function (results, parser) {
         if (!map) {
             map = BankMapping.recognizeBank(results.meta.fields);
-            
+            toastr.info("Bank recognized as " + map.getBank());
         }
 
         for (let index = 0, line; line = results.data[index]; ++index) {
@@ -298,7 +302,7 @@ StreamConverter = function () {
     };
 
     this.errorHandle = function (error, file) {
-        alert("An error occured in file " + file + ": " + error);
+        toast.error("An error occured in file " + file + ": " + error);
     };
 
     this.complete = function (results) {
