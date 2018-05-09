@@ -2,7 +2,7 @@ if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
     alert("The File APIs are not fully supported in this browser.");
 }
 
-parseFile = function (file) {
+const parseFile = function (file) {
     const converter = new StreamConverter();
 
     Papa.parse(file, {
@@ -45,7 +45,7 @@ Dropzone.options.dropzone = {
     addRemoveLinks: false
 };
 
-parse = () => {
+const parse = () => {
     const files = document.getElementById("file").files;
 
     for (let index = 0, file; file = files[index]; ++index) {
@@ -53,7 +53,7 @@ parse = () => {
     }
 };
 
-AccountData = function (accountNumber) {
+const AccountData = function (accountNumber) {
     let csvData = [
         ["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"]
     ];
@@ -94,18 +94,11 @@ AccountData = function (accountNumber) {
     };
 };
 
-field = function (fieldList, splitAfter, splitBefore) {
-    this.fieldList = fieldList;
-    this.splitAfter = splitAfter;
-    this.splitBefore = splitBefore;
+const Field = function (fieldList, splitAfter, splitBefore) {
+    const getFields = function (line) {
+        let returnLine = "";
 
-    getFields = function (line) {
-        returnLine = "";
-
-        for (let index = 0, field; field = this.field.fieldList[index]; ++index) {
-            console.log(line);
-            console.log(field);
-            console.log(returnLine);
+        for (let index = 0, field; field = fieldList[index]; ++index) {
             returnLine += line[field];
         }
 
@@ -114,71 +107,45 @@ field = function (fieldList, splitAfter, splitBefore) {
 
     this.getLine = function (line) {
         let text = getFields(line);
-        if (this.splitAfter)
-            text = text.split(this.splitAfter, 1)[1];
-        if (this.splitBefore)
-            text = text.split(this.splitBefore, 1)[0];
+        if (splitAfter != null) {
+            text = text.split(splitAfter, 2)[1];
+        }
+        if (splitBefore != null) {
+            text = text.split(splitBefore, 2)[0];
+        }
 
-        console.log(text);
         return text;
     };
 };
 
-BankMapping = function (bank) {
-    const DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
-
-    const mappings = {
-        RABO: {
-            account: new field(["IBAN/BBAN"]),
-            date: new field(["Datum"]),
-            dateFormat: "YYYY-MM-DD",
-            payee: new field(["Naam Tegenpartij"]),
-            category: new field([]),
-            memo: new field(["Omschrijving-1", "Omschrijving-2", "Omschrijving-3"]),
-            outflow: new field(["Bedrag"]),
-            inflow: new field(["Bedrag"]),
-            positiveIndicator: "+",
-            negativeIndicator: "-",
-            seperateIndicator: null
-        },
-        ING: {
-            account: new field(["Rekening"]),
-            date: new field(["Datum"]),
-            dateFormat: "YYYYMMDD",
-            payee: new field(["Naam / Omschrijving"]),
-            category: new field([]),
-            memo: new field(["Mededelingen"], "Omschrijving: ", " IBAN:"),
-            outflow: new field(["Bedrag"]),
-            inflow: new field(["Bedrag"]),
-            positiveIndicator: "Bij",
-            negativeIndicator: "Af",
-            seperateIndicator: new field(["Af Bij"])
-        }
-    };
-
+const BankMapping = function (bank) {
     this.getAccount = function (line) {
-        console.log(bank);
-        console.log(mappings);
-        return mappings[bank].account.getLine(line);
+        return BankMapping.mappings[bank].account.getLine(line);
     }
 
     this.getDate = function (line) {
-        const dateField = mappings[bank].date;
+        const dateField = BankMapping.mappings[bank].date;
         const text = dateField.getLine(line);
-        const dateFormat = mappings[bank].dateFormat;
+        const dateFormat = BankMapping.mappings[bank].dateFormat;
 
-        if (dateFormat == DEFAULT_DATE_FORMAT)
+        if (dateFormat == BankMapping.DEFAULT_DATE_FORMAT)
             return text;
 
-        let year = "", month = "", day = "";
-        for (let i = 0, letter; letter = dateFormat[i]; ++i) {
-            switch (letter) {
+        let year = "";
+        let month = "";
+        let day = "";
+        console.log(dateFormat);
+        for (let index = 0; index < dateFormat.length; ++index) {
+            switch (dateFormat.charAt(index)) {
                 case "Y":
-                    year += text[i];
+                    year += text.charAt(index);
+                    break;
                 case "M":
-                    month += text[i];
+                    month += text.charAt(index);
+                    break;
                 case "D":
-                    day += text[i];
+                    day += text.charAt(index);
+                    break;
             }
         }
 
@@ -186,7 +153,7 @@ BankMapping = function (bank) {
     };
 
     this.getPayee = function (line) {
-        return mappings[bank].payee.getLine(line);
+        return BankMapping.mappings[bank].payee.getLine(line);
     };
 
     this.getCategory = function (line) {
@@ -194,18 +161,17 @@ BankMapping = function (bank) {
     };
 
     this.getMemo = function (line) {
-        return mappings[bank].memo.getLine(line);
+        return BankMapping.mappings[bank].memo.getLine(line);
     };
 
-    isIndicatorPositive = function (indicatorField) {
-        console.log(indicatorField);
-        if (indicatorField.contains(mappings[bank].positiveIndicator))
+    const isIndicatorPositive = function (indicatorField) {
+        if (indicatorField.includes(BankMapping.mappings[bank].positiveIndicator))
             return true;
         return false;
     };
 
     this.getInflow = function (line) {
-        const bankMap = mappings[bank];
+        const bankMap = BankMapping.mappings[bank];
         let value = bankMap.inflow.getLine(line);
         let indicator = value;
 
@@ -222,12 +188,9 @@ BankMapping = function (bank) {
     };
 
     this.getOutflow = function (line) {
-        const bankMap = mappings[bank];
+        const bankMap = BankMapping.mappings[bank];
         let value = bankMap.outflow.getLine(line);
         let indicator = value;
-        console.log(bankMap.outflow);
-        console.log(indicator);
-        console.log(mappings[bank]);
 
         if (bankMap.seperateIndicator != null)
             indicator = bankMap.seperateIndicator.getLine(line);
@@ -246,29 +209,63 @@ BankMapping = function (bank) {
 
 BankMapping.RABO = "RABO";
 BankMapping.ING = "ING";
+BankMapping.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
+BankMapping.mappings = {
+    RABO: {
+        header: ["IBAN/BBAN", "Munt", "BIC", "Volgnr", "Datum", "Rentedatum", "Bedrag", "Saldo na trn", "Tegenrekening IBAN/BBAN", "Naam tegenpartij", "Naam uiteindelijke partij", "Naam initi�rende partij", "BIC tegenpartij", "Code", "Batch ID", "Transactiereferentie", "Machtigingskenmerk", "Incassant ID", "Betalingskenmerk", "Omschrijving-1", "Omschrijving-2", "Omschrijving-3", "Reden retour", "Oorspr bedrag", "Oorspr munt", "Koers"],
+        account: new Field(["IBAN/BBAN"]),
+        date: new Field(["Datum"]),
+        dateFormat: "YYYY-MM-DD",
+        payee: new Field(["Naam tegenpartij"]),
+        category: new Field([]),
+        memo: new Field(["Omschrijving-1", "Omschrijving-2", "Omschrijving-3"]),
+        outflow: new Field(["Bedrag"]),
+        inflow: new Field(["Bedrag"]),
+        positiveIndicator: "+",
+        negativeIndicator: "-",
+    },
+    ING: {
+        header: ["Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"],
+        account: new Field(["Rekening"]),
+        date: new Field(["Datum"]),
+        dateFormat: "YYYYMMDD",
+        payee: new Field(["Naam / Omschrijving"]),
+        category: new Field([]),
+        memo: new Field(["Mededelingen"], "Omschrijving: ", " IBAN:"),
+        outflow: new Field(["Bedrag (EUR)"]),
+        inflow: new Field(["Bedrag (EUR)"]),
+        positiveIndicator: "Bij",
+        negativeIndicator: "Af",
+        seperateIndicator: new Field(["Af Bij"])
+    }
+};
+BankMapping.recognizeBank = function (header) {
+    const areArraysEqual = (arrayOne, arrayTwo) => {
+        for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
+            if (itemOne != itemTwo)
+                return false;
+        }
+        return true;
+    };
+
+    for (key in BankMapping.mappings) {
+        if (areArraysEqual(header, BankMapping.mappings[key].header))
+            return new BankMapping(key);
+    }
+    alert("Could not be parsed");
+};
 
 StreamConverter = function () {
     const accounts = {};
-    const map = new BankMapping(BankMapping.RABO);
-    console.log(map);
-    console.log(BankMapping.RABO);
+    let map = null;
 
-    isErrorIndex = function (index, errors) {
+    const isErrorIndex = function (index, errors) {
         if (errors[index] != null)
             return true;
         return false;
     };
 
-    this.convert = function (results, parser) {
-        for (let index = 0, line; line = results.data[index]; ++index) {
-            if (isErrorIndex(index, results.errors))
-                continue;
-
-            this.convertLine(line);
-        }
-    };
-
-    this.convertLine = function (line) {
+    const convertLine = function (line) {
         const account = map.getAccount(line);
 
         if (accounts[account] == null)
@@ -286,13 +283,25 @@ StreamConverter = function () {
         accounts[account].addLine(dataRow);
     };
 
+    this.convert = function (results, parser) {
+        if (!map) {
+            map = BankMapping.recognizeBank(results.meta.fields);
+            
+        }
+
+        for (let index = 0, line; line = results.data[index]; ++index) {
+            if (isErrorIndex(index, results.errors))
+                continue;
+
+            convertLine(line);
+        }
+    };
+
     this.errorHandle = function (error, file) {
         alert("An error occured in file " + file + ": " + error);
     };
 
     this.complete = function (results) {
-        console.log("Complete");
-
         let keys = Object.keys(accounts);
         for (let index = 0, account; account = accounts[keys[index]]; ++index) {
             account.downloadCSV();
