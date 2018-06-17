@@ -37,7 +37,7 @@ Dropzone.options.dropzone = {
             done("Could not parse file " + file.name);
         }
     },
-    acceptedMimeTypes: "text/csv",
+    acceptedMimeTypes: ["text/csv", "application/octet-stream", "text/plain", "application/vnd.ms-excel", "text/x-csv"],
     dictDefaultMessage: "Drag csv's here or click here to select the files from your device",
     complete: function (file) {
         this.removeFile(file);
