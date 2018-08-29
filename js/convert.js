@@ -94,7 +94,7 @@ const AccountData = function (accountNumber) {
     };
 };
 
-const Field = function (fieldList, splitAfter, splitBefore) {
+const Field = function (fieldList, splits, splitsKeep) {
     const getFields = function (line) {
         let returnLine = "";
 
@@ -107,13 +107,34 @@ const Field = function (fieldList, splitAfter, splitBefore) {
 
     this.getLine = function (line) {
         let text = getFields(line);
-        if (splitAfter != null) {
-            text = text.split(splitAfter, 2)[1];
-        }
-        if (splitBefore != null) {
-            text = text.split(splitBefore, 2)[0];
-        }
+        if (Array.isArray(splits) && Array.isArray(splitsKeep)) {
+            for (let index in splits) {
+                text = text.replace(splits[index] + ":", "|" + splits[index] + ":");
+            }
+            let explodedText = text.split("|");
 
+            let items = {};
+            for (let index in explodedText) {
+                let match = explodedText[index].match(/^[a-zA-Z ]*:/);
+                if (match === null) {
+                    continue;
+                }
+                match = match[0];
+                items[match.substring(0, match.length - 1)] = explodedText[index].trim();
+            }
+
+            textKeep = '';
+            for (let index in splitsKeep) {
+                if (items[splitsKeep[index]] === undefined) {
+                    continue;
+                }
+                if (textKeep !== "") {
+                    textKeep += ' | ';
+                }
+                textKeep += items[splitsKeep[index]];
+            }
+            text = textKeep;
+        }
         return text;
     };
 };
@@ -235,7 +256,10 @@ BankMapping.mappings = {
         dateFormat: "YYYYMMDD",
         payee: new Field(["Naam / Omschrijving"]),
         category: new Field([]),
-        memo: new Field(["Mededelingen"], "Omschrijving: ", " IBAN:"),
+        memo: new Field(
+            ["Mededelingen"],
+            ['Transactie', 'Term', 'Pasvolgnr', 'Omschrijving', 'IBAN', 'Kenmerk', 'Machtiging ID', 'Incassant ID'],
+            ['Transactie', 'Term', 'Omschrijving', 'IBAN', 'Kenmerk']),
         outflow: new Field(["Bedrag (EUR)"]),
         inflow: new Field(["Bedrag (EUR)"]),
         positiveIndicator: "Bij",
