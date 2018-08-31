@@ -1,0 +1,4 @@
+"Datum","Naam / Omschrijving","Rekening","Tegenrekening","Code","Af Bij","Bedrag (EUR)","MutatieSoort","Mededelingen"
+"20180503","Hr A.B. de Vries","NL01INGB0123456789","NL01RABO0123456789","GT","Bij","15,00","Online bankieren","Naam: Hr A.B. de Vries Omschrijving: Bier IBAN: NL01RABO0123456789"
+"20180502","MHM HOTELS","NL01INGB0123456789","NL13ANBA0123456789","OV","Bij","15,00","Overschrijving","Naam: MHM HOTELS Omschrijving: Ontbijt IBAN: NL13ANBA0123456789"
+"20180502","M.C. Schilder","NL01INGB0123456789","NL44BUNQ0123456789","GT","Af","35,00","Online bankieren","Naam: M.C. Schilder Omschrijving: Doe er iets leuks mee IBAN: NL44BUNQ0123456789"
