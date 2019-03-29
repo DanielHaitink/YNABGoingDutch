@@ -2,6 +2,13 @@ if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
     alert("The File APIs are not fully supported in this browser.");
 }
 
+const parse = () => {
+    const files = document.getElementById("file").files;
+
+    for (const file of files)
+        parseFile(file);
+};
+
 const parseFile = function (file) {
     const converter = new StreamConverter();
 
@@ -14,43 +21,10 @@ const parseFile = function (file) {
             converter.errorHandle(error, file);
         },
         complete: function (results, file) {
-            toastr.success(file.name + " was succesfully parsed");
+            toastr.success(file.name + " was successfully parsed");
             converter.complete(results);
         }
     });
-};
-
-Dropzone.options.dropzone = {
-    paramName: "file",
-    clickable: true,
-    uploadMultiple: true,
-    ignoreHiddenFiles: true,
-    accept: function (file, done) {
-        if (file.name.endsWith(".csv")) {
-            // TODO: check if file is succesfully parsed
-            parseFile(file);
-            this.removeFile(file);
-            done();
-        } else {
-            toastr.error(file.name + " was not parsed");
-            this.removeFile(file);
-            done("Could not parse file " + file.name);
-        }
-    },
-    acceptedMimeTypes: ["text/csv", "application/octet-stream", "text/plain", "application/vnd.ms-excel", "text/x-csv"],
-    dictDefaultMessage: "Drag csv's here or click here to select the files from your device",
-    complete: function (file) {
-        this.removeFile(file);
-    },
-    addRemoveLinks: false
-};
-
-const parse = () => {
-    const files = document.getElementById("file").files;
-
-    for (let index = 0, file; file = files[index]; ++index) {
-        parseFile(file);
-    }
 };
 
 const AccountData = function (accountNumber) {
@@ -65,9 +39,8 @@ const AccountData = function (accountNumber) {
     this.downloadCSV = function () {
         let blobText = "";
 
-        for (let index = 0, line; line = csvData[index]; ++index) {
+        for (const line of csvData)
             blobText += line.join(';') + '\n';
-        }
 
         const fileName = accountNumber + ".csv";
         const blob = new Blob([blobText], {
@@ -79,7 +52,7 @@ const AccountData = function (accountNumber) {
         } else {
             const link = document.createElement("a");
 
-            if (link.download != undefined) {
+            if (link.download !== undefined) {
                 let url = URL.createObjectURL(blob);
 
                 link.setAttribute("href", url);
@@ -98,24 +71,26 @@ const Field = function (fieldList, splits, splitsKeep) {
     const getFields = function (line) {
         let returnLine = "";
 
-        for (let index = 0, field; field = fieldList[index]; ++index) {
+        for (const field of fieldList)
             returnLine += line[field];
-        }
 
         return returnLine;
     };
 
     this.getLine = function (line) {
         let text = getFields(line);
+
         if (Array.isArray(splits) && Array.isArray(splitsKeep)) {
-            for (let index in splits) {
-                text = text.replace(splits[index] + ":", "|" + splits[index] + ":");
+            for (let key in splits) {
+                if (splits.hasOwnProperty(key))
+                    text = text.replace(splits[key] + ":", "|" + splits[key] + ":");
             }
             let explodedText = text.split("|");
 
             let items = {};
             for (let index in explodedText) {
                 let match = explodedText[index].match(/^[a-zA-Z ]*:/);
+
                 if (match === null) {
                     continue;
                 }
@@ -123,17 +98,19 @@ const Field = function (fieldList, splits, splitsKeep) {
                 items[match.substring(0, match.length - 1)] = explodedText[index].trim();
             }
 
-            textKeep = '';
-            for (let index in splitsKeep) {
-                if (items[splitsKeep[index]] === undefined) {
-                    continue;
+            let textKeep = '';
+            for (let key in splitsKeep) {
+                if (splitsKeep.hasOwnProperty(key)) {
+                    if (items[splitsKeep[key]] === undefined) {
+                        continue;
+                    }
+                    if (textKeep !== "") {
+                        textKeep += ' | ';
+                    }
+                    textKeep += items[splitsKeep[key]];
                 }
-                if (textKeep !== "") {
-                    textKeep += ' | ';
-                }
-                textKeep += items[splitsKeep[index]];
             }
-            text = textKeep;
+            return textKeep;
         }
         return text;
     };
@@ -142,18 +119,18 @@ const Field = function (fieldList, splits, splitsKeep) {
 const BankMapping = function (bank) {
     this.getBank = () => {
         return bank;
-    }
+    };
 
     this.getAccount = function (line) {
         return BankMapping.mappings[bank].account.getLine(line);
-    }
+    };
 
     this.getDate = function (line) {
         const dateField = BankMapping.mappings[bank].date;
         const text = dateField.getLine(line);
         const dateFormat = BankMapping.mappings[bank].dateFormat;
 
-        if (dateFormat == BankMapping.DEFAULT_DATE_FORMAT)
+        if (dateFormat === BankMapping.DEFAULT_DATE_FORMAT)
             return text;
 
         let year = "";
@@ -190,9 +167,8 @@ const BankMapping = function (bank) {
     };
 
     const isIndicatorPositive = function (indicatorField) {
-        if (indicatorField.includes(BankMapping.mappings[bank].positiveIndicator))
-            return true;
-        return false;
+        return indicatorField.includes(BankMapping.mappings[bank].positiveIndicator);
+
     };
 
     this.getInflow = function (line) {
@@ -200,11 +176,11 @@ const BankMapping = function (bank) {
         let value = bankMap.inflow.getLine(line);
         let indicator = value;
 
-        if (bankMap.seperateIndicator != null)
-            indicator = bankMap.seperateIndicator.getLine(line);
+        if (bankMap.separateIndicator != null)
+            indicator = bankMap.separateIndicator.getLine(line);
 
         if (isIndicatorPositive(indicator)) {
-            if (bankMap.seperateIndicator != null)
+            if (bankMap.separateIndicator != null)
                 value = value.replace(bankMap.positiveIndicator, "");
             return value;
         }
@@ -217,11 +193,11 @@ const BankMapping = function (bank) {
         let value = bankMap.outflow.getLine(line);
         let indicator = value;
 
-        if (bankMap.seperateIndicator != null)
-            indicator = bankMap.seperateIndicator.getLine(line);
+        if (bankMap.separateIndicator != null)
+            indicator = bankMap.separateIndicator.getLine(line);
 
         if (!isIndicatorPositive(indicator)) {
-            if (bankMap.seperateIndicator != null)
+            if (bankMap.separateIndicator != null)
                 value = value.replace(bankMap.negativeIndicator, "");
             if (value.startsWith("-"))
                 value = value.replace("-", "");
@@ -264,21 +240,23 @@ BankMapping.mappings = {
         inflow: new Field(["Bedrag (EUR)"]),
         positiveIndicator: "Bij",
         negativeIndicator: "Af",
-        seperateIndicator: new Field(["Af Bij"])
+        separateIndicator: new Field(["Af Bij"])
     }
 };
 BankMapping.recognizeBank = function (header) {
     const areArraysEqual = (arrayOne, arrayTwo) => {
         for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
-            if (itemOne != itemTwo)
+            if (itemOne !== itemTwo)
                 return false;
         }
         return true;
     };
 
-    for (key in BankMapping.mappings) {
-        if (areArraysEqual(header, BankMapping.mappings[key].header))
-            return new BankMapping(key);
+    for (let key in BankMapping.mappings) {
+        if (BankMapping.mappings.hasOwnProperty(key)) {
+            if (areArraysEqual(header, BankMapping.mappings[key].header))
+                return new BankMapping(key);
+        }
     }
     alert("Could not be parsed");
 };
@@ -288,9 +266,8 @@ StreamConverter = function () {
     let map = null;
 
     const isErrorIndex = function (index, errors) {
-        if (errors[index] != null)
-            return true;
-        return false;
+        return errors[index] != null;
+
     };
 
     const convertLine = function (line) {
@@ -326,11 +303,12 @@ StreamConverter = function () {
     };
 
     this.errorHandle = function (error, file) {
-        toast.error("An error occured in file " + file + ": " + error);
+        toastr.error("An error occurred in file " + file + ": " + error);
     };
 
     this.complete = function (results) {
         let keys = Object.keys(accounts);
+
         for (let index = 0, account; account = accounts[keys[index]]; ++index) {
             account.downloadCSV();
         }
