@@ -1,0 +1,76 @@
+body {
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: gray;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: white;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+    color: navajowhite;
+}
+
+a:visited {
+    color: navajowhite;
+}
+
+a:hover {
+    color: mediumblue;
+}
+
+a:active {
+    color: mediumblue;
+}
+
+header {
+    height: 200px;
+    /*background-color: rebeccapurple;*/
+}
+
+footer {
+    height: 100px;
+    /*background-color: blue;*/
+}
+
+.row {
+    display: flex;
+}
+
+.column {
+    flex: 50%;
+    /*width: 50%;*/
+}
+
+#header-col {
+    /*background-color: fuchsia;*/
+    height: 300px;
+}
+
+#headerless-col {
+    /*background-color: #1c7430;*/
+    height: 300px;
+}
+
+@media screen and (max-width: 1000px) {
+    body {
+        width: 600px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        margin-right: unset;
+        margin-left: unset;
+        width: 600px;
+    }
+
+    .column {
+        float: none;
+        flex: 100%;
+    }
+}
