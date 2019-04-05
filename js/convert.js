@@ -10,24 +10,83 @@ const parse = () => {
         parseFile(file);
 };
 
+const FileStreamer = function(file, onStep, onError, onComplete) {
+    let header = null;
+
+    const parseFileRow = function (text) {
+
+
+        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r)/g;
+        let match = text.match(splitFieldsRegex);
+        console.log(match);
+
+        // TODO: Check for header (all strings, no empty fields, all unique, does not contain a date
+
+        // split newlines
+
+        // create dictionary with fields
+
+        // call onstep with info
+    };
+
+    const reader = function () {
+        let loaded = 0;
+        let step = 1024;
+        let totalSize = file.size;
+        let start = 0;
+        let progress = 0;
+        let fileReader = new FileReader();
+
+        fileReader.onload = function(evt) {
+            console.log(evt.target.result);
+            // Parse text
+            const rows = evt.target.result.split("\r\n");
+            // TODO: check for rest part of no complete line
+            for (const row of rows)
+                parseFileRow(row);
+
+            loaded += step;
+            progress = (loaded/totalSize) * 100;
+
+            if (loaded <= totalSize) {
+                blob = file.slice(loaded, loaded + step);
+
+                fileReader.readAsText(blob);
+            } else {
+                // completed
+
+                // TODO: call onComplete
+                loaded = totalSize;
+            }
+        };
+
+        let blob = file.slice(start, step);
+        fileReader.readAsText(blob);
+    };
+
+    reader();
+};
+
 // Parse every file as a stream
 const parseFile = function (file) {
     const converter = new FileStreamConverter();
 
-    Papa.parse(file, {
-        header: true,
-        step: function (results, parser) {
-            converter.convert(results, parser);
-        },
-        errors: function (error, file) {
-            converter.handleError(error, file);
-        },
-        complete: function (results, file) {
-            toastr.success(file.name + " was successfully parsed");
-            converter.complete(results);
-            document.getElementById("file").value = "";
-        }
-    });
+    const stream = new FileStreamer(file, null, null, null);
+
+    // Papa.parse(file, {
+    //     header: true,
+    //     step: function (results, parser) {
+    //         converter.convert(results, parser);
+    //     },
+    //     errors: function (error, file) {
+    //         converter.handleError(error, file);
+    //     },
+    //     complete: function (results, file) {
+    //         toastr.success(file.name + " was successfully parsed");
+    //         converter.complete(results);
+    //         document.getElementById("file").value = "";
+    //     }
+    // });
 };
 
 const AccountData = function (accountNumber) {
@@ -94,7 +153,7 @@ const Field = function (fieldList, splits, splitsKeep) {
 
             let items = {};
             for (let index in explodedText) {
-                let match = explodedText[index].match(/^[a-zA-Z ]*:/);
+                let match = explodedText[index].match(/^[a-zA-Z]*:/);
 
                 if (match === null) {
                     continue;
