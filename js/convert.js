@@ -11,14 +11,22 @@ const parse = () => {
 };
 
 const FileStreamer = function(file, onStep, onError, onComplete) {
-    let header = null;
+    this.header = null;
+    this.firstLineParsed = false;
 
     const parseFileRow = function (text) {
 
 
         const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r)/g;
         let match = text.match(splitFieldsRegex);
+        // Look for empty spaces, dates and IBAN numbers
+        const isNotHeaderRegex = /["']{2}[,;]|[,;]{2}|([\d]{1,4}[\-\/][\d]{1,2}[\-\/][\d]{1,4})|(NL\d{2}\w{4}\d{10})/g;
+        let isHeader = !isNotHeaderRegex.test(text);
         console.log(match);
+
+        for (let field of match) {
+
+        }
 
         // TODO: Check for header (all strings, no empty fields, all unique, does not contain a date
 
