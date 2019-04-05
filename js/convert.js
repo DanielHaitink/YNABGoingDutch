@@ -40,7 +40,7 @@ const AccountData = function (accountNumber) {
         let blobText = "";
 
         for (const line of csvData)
-            blobText += line.join(';') + '\n';
+            blobText += line.join(";") + "\n";
 
         const fileName = accountNumber + ".csv";
         const blob = new Blob([blobText], {
@@ -67,7 +67,10 @@ const AccountData = function (accountNumber) {
     };
 };
 
-const Field = function (fieldList, splits, splitsKeep) {
+// A Field holds the information on what fields of the CSV correspond to the field that has to be obtained.
+const Field = function (fieldList) {
+
+    /* Return texts from fields in the given CSV line */
     const getFields = function (line) {
         let returnLine = "";
 
@@ -78,46 +81,29 @@ const Field = function (fieldList, splits, splitsKeep) {
     };
 
     this.getLine = function (line) {
-        let text = getFields(line);
-
-        if (Array.isArray(splits) && Array.isArray(splitsKeep)) {
-            for (let key in splits) {
-                if (splits.hasOwnProperty(key))
-                    text = text.replace(splits[key] + ":", "|" + splits[key] + ":");
-            }
-            let explodedText = text.split("|");
-
-            let items = {};
-            for (let index in explodedText) {
-                let match = explodedText[index].match(/^[a-zA-Z ]*:/);
-
-                if (match === null) {
-                    continue;
-                }
-                match = match[0];
-                items[match.substring(0, match.length - 1)] = explodedText[index].trim();
-            }
-
-            let textKeep = '';
-            for (let key in splitsKeep) {
-                if (splitsKeep.hasOwnProperty(key)) {
-                    if (items[splitsKeep[key]] === undefined) {
-                        continue;
-                    }
-                    if (textKeep !== "") {
-                        textKeep += ' | ';
-                    }
-                    textKeep += items[splitsKeep[key]];
-                }
-            }
-            return textKeep;
-        }
-        return text;
+        return getFields(line);
     };
 };
 
+
 const BankMapping = function (bank) {
+    function readJsonFile(file, callback) {
+        const rawFile = new XMLHttpRequest();
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4 && rawFile.status == "200") {
+                callback(rawFile.responseText);
+            }
+        };
+        rawFile.send(null);
+    }
+
     this.getBank = () => {
+        readJsonFile("/banks.json", function(text){
+            console.log("HERE");
+            this.mappingsz = JSON.parse(text);
+        });
         return bank;
     };
 
@@ -208,12 +194,13 @@ const BankMapping = function (bank) {
     };
 };
 
-BankMapping.RABO = "RABO";
-BankMapping.ING = "ING";
 BankMapping.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
 BankMapping.mappings = {
     RABO: {
-        header: ["IBAN/BBAN", "Munt", "BIC", "Volgnr", "Datum", "Rentedatum", "Bedrag", "Saldo na trn", "Tegenrekening IBAN/BBAN", "Naam tegenpartij", "Naam uiteindelijke partij", "Naam initi�rende partij", "BIC tegenpartij", "Code", "Batch ID", "Transactiereferentie", "Machtigingskenmerk", "Incassant ID", "Betalingskenmerk", "Omschrijving-1", "Omschrijving-2", "Omschrijving-3", "Reden retour", "Oorspr bedrag", "Oorspr munt", "Koers"],
+        header: ["IBAN/BBAN", "Munt", "BIC", "Volgnr", "Datum", "Rentedatum", "Bedrag", "Saldo na trn", 
+        "Tegenrekening IBAN/BBAN", "Naam tegenpartij", "Naam uiteindelijke partij", "Naam initi�rende partij", "BIC tegenpartij", 
+        "Code", "Batch ID", "Transactiereferentie", "Machtigingskenmerk", "Incassant ID", "Betalingskenmerk", "Omschrijving-1", "Omschrijving-2", 
+        "Omschrijving-3", "Reden retour", "Oorspr bedrag", "Oorspr munt", "Koers"],
         account: new Field(["IBAN/BBAN"]),
         date: new Field(["Datum"]),
         dateFormat: "YYYY-MM-DD",
@@ -226,16 +213,14 @@ BankMapping.mappings = {
         negativeIndicator: "-",
     },
     ING: {
-        header: ["Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"],
+        header: ["Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", 
+        "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"],
         account: new Field(["Rekening"]),
         date: new Field(["Datum"]),
         dateFormat: "YYYYMMDD",
         payee: new Field(["Naam / Omschrijving"]),
         category: new Field([]),
-        memo: new Field(
-            ["Mededelingen"],
-            ['Transactie', 'Term', 'Pasvolgnr', 'Omschrijving', 'IBAN', 'Kenmerk', 'Machtiging ID', 'Incassant ID'],
-            ['Transactie', 'Term', 'Omschrijving', 'IBAN', 'Kenmerk']),
+        memo: new Field(["Mededelingen"]),
         outflow: new Field(["Bedrag (EUR)"]),
         inflow: new Field(["Bedrag (EUR)"]),
         positiveIndicator: "Bij",
@@ -243,6 +228,7 @@ BankMapping.mappings = {
         separateIndicator: new Field(["Af Bij"])
     }
 };
+
 BankMapping.recognizeBank = function (header) {
     const areArraysEqual = (arrayOne, arrayTwo) => {
         for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
@@ -258,6 +244,7 @@ BankMapping.recognizeBank = function (header) {
                 return new BankMapping(key);
         }
     }
+
     alert("Could not be parsed");
 };
 
