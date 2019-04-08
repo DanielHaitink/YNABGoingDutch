@@ -10,48 +10,116 @@ const parse = () => {
         parseFile(file);
 };
 
-const FileStreamer = function(file, onStep, onError, onComplete) {
-    this.header = null;
-    this.firstLineParsed = false;
+const FileStreamer = function (file, onStep, onError, onComplete) {
+    let header = null;
+    let numberOfCols = 0;
+    let firstLineParsed = false;
 
-    const parseFileRow = function (text) {
-
-
-        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r)/g;
-        let match = text.match(splitFieldsRegex);
+    const isHeader = function (line) {
         // Look for empty spaces, dates and IBAN numbers
-        const isNotHeaderRegex = /["']{2}[,;]|[,;]{2}|([\d]{1,4}[\-\/][\d]{1,2}[\-\/][\d]{1,4})|(NL\d{2}\w{4}\d{10})/g;
-        let isHeader = !isNotHeaderRegex.test(text);
-        console.log(match);
+        const isNotHeaderRegex = /["']{2}[,;]|[,;]{2}|([\d]{1,4}[\-\/][\d]{1,2}[\-\/][\d]{1,4})|([A-Z]{2}\d{2}[A-Z]{4}\d{10})/g;
+        return !isNotHeaderRegex.test(line);
+    };
 
-        for (let field of match) {
+    const cleanFields = function (fields) {
+        let cleanedFields = [];
+
+        for (let field of fields) {
+            field = field.replace(/(\r\n|\n|\r)/gm," ");
+
+            if (field.endsWith(",") || field.endsWith(";"))
+                field = field.substring(0, field.length - 1);
+
+            if ((field.startsWith("\"") && field.endsWith("\"")) || (field.startsWith("\'") && field.endsWith("\'")))
+                cleanedFields.push(field.substring(1, field.length - 1));
+            else
+                cleanedFields.push(field);
+        }
+
+        return cleanedFields;
+    };
+
+    const splitFields = function (line) {
+        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
+
+        let fields = line.match(splitFieldsRegex);
+        return cleanFields(fields);
+    };
+
+    const parseFirstRow = function (line) {
+        firstLineParsed = true;
+        numberOfCols = fields.size;
+
+        if (isHeader(line)) {
+            header = fields;
+        }
+    };
+
+    const parseRow = function (line) {
+        if (line === null || line === "")
+            return;
+
+        const fields = splitFields(line);
+
+        if (!firstLineParsed)
+            return parseFirstRow(line);
+
+        for (let field of fields) {
 
         }
 
-        // TODO: Check for header (all strings, no empty fields, all unique, does not contain a date
 
-        // split newlines
 
         // create dictionary with fields
 
         // call onstep with info
     };
 
-    const reader = function () {
+    const splitRows = function (line) {
+        return line.match(/.+(\r?\n|\r|$)/g);
+    };
+
+    const read = function () {
         let loaded = 0;
+        // let step = 2048;
         let step = 1024;
         let totalSize = file.size;
         let start = 0;
         let progress = 0;
         let fileReader = new FileReader();
+        let incompleteRow = null;
 
         fileReader.onload = function(evt) {
-            console.log(evt.target.result);
             // Parse text
-            const rows = evt.target.result.split("\r\n");
-            // TODO: check for rest part of no complete line
-            for (const row of rows)
-                parseFileRow(row);
+            let rows = splitRows(evt.target.result);
+
+            // Complete previous incomplete row
+            if (incompleteRow !== null) {
+                rows[0] = incompleteRow + rows[0];
+                incompleteRow = null;
+            }
+
+            // Check last row if it is complete
+            const lastRow = rows[rows.length - 1];
+            if (firstLineParsed && numberOfCols !== lastRow.length) {
+                // incomplete row
+                incompleteRow = lastRow;
+                rows.remove(rows.length - 1);
+            } else if (!firstLineParsed) {
+                // this is the first line still. Needs to end with an newline
+                if (! (lastRow.endsWith("\r") || lastRow.endsWith("\n"))) {
+                    // incomplete row
+                    incompleteRow = lastRow;
+                    rows.remove(rows.length - 1);
+                }
+            }
+
+            for (const row of rows) {
+                if (row === null || row === "")
+                    continue;
+
+                parseRow(row);
+            }
 
             loaded += step;
             progress = (loaded/totalSize) * 100;
@@ -72,7 +140,7 @@ const FileStreamer = function(file, onStep, onError, onComplete) {
         fileReader.readAsText(blob);
     };
 
-    reader();
+    read();
 };
 
 // Parse every file as a stream
@@ -80,21 +148,6 @@ const parseFile = function (file) {
     const converter = new FileStreamConverter();
 
     const stream = new FileStreamer(file, null, null, null);
-
-    // Papa.parse(file, {
-    //     header: true,
-    //     step: function (results, parser) {
-    //         converter.convert(results, parser);
-    //     },
-    //     errors: function (error, file) {
-    //         converter.handleError(error, file);
-    //     },
-    //     complete: function (results, file) {
-    //         toastr.success(file.name + " was successfully parsed");
-    //         converter.complete(results);
-    //         document.getElementById("file").value = "";
-    //     }
-    // });
 };
 
 const AccountData = function (accountNumber) {
