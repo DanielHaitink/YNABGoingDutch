@@ -11,6 +11,11 @@ const parse = () => {
 };
 
 const FileStreamer = function (file, onStep, onError, onComplete) {
+    const FileStreamerResult = function (header, dataArray) {
+        this.fields = header;
+        this.data = dataArray;
+    };
+
     let header = null;
     let numberOfCols = 0;
     let firstLineParsed = false;
@@ -56,65 +61,86 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         }
     };
 
-    const createDict = function (fields) {
+    const createJson = function (fields) {
         let dict = {};
 
-        console.log(header);
-        console.log(fields);
-
         if (header !== null) {
-            for (let index = 0; index < fields; ++index) {
-                console.log(index);
+            for (let index = 0; index < fields.length; ++index) {
                 dict[header[index]] = fields[index];
             }
         } else {
-            for (let index = 0; index < fields; ++index) {
+            for (let index = 0; index < fields.length; ++index) {
                 dict[index] = fields[index];
             }
         }
 
-        console.log(dict);
-
         return dict;
+    };
+
+    const endsWithNewLine = function (line) {
+        return (line.endsWith("\r") || line.endsWith("\n"));
+    };
+
+    const isRowComplete = function (line, fields) {
+        // TODO: row might not be complete with correct number of cols. Can have more data in last column.
+        //  Wait for more data until newline is found or until no new data is streamed
+
+        // console.log(line);
+
+        if (endsWithNewLine(line))
+            return true;
+
+        // if (firstLineParsed && numberOfCols !== fields.length) {
+        //     // incomplete row
+        //     return false;
+        // } else if (!firstLineParsed) {
+        //     // this is the first line still. Needs to end with an newline
+        //     return false;
+        // }
+
+        return false;
     };
 
     const parseRow = function (line) {
         if (line === null || line === "")
-            return;
+            return null;
 
         const fields = splitFields(line);
 
-        // Check if row is complete
-        if (firstLineParsed && numberOfCols !== fields.length) {
-            // incomplete row
-            incompleteRow = line;
-            return;
-        } else if (!firstLineParsed) {
-            // this is the first line still. Needs to end with an newline
-            if (! (line.endsWith("\r") || line.endsWith("\n"))) {
-                // incomplete row
-                incompleteRow = line;
-                return;
+        if (! isRowComplete(line, fields)) {
+            if (incompleteRow !== null) {
+                alert("INCOMPLETE ROW IS NOT NULL");
+                console.log(incompleteRow);
+                console.log(line);
+                console.log(fields);
             }
+            incompleteRow = line;
+            return null;
         }
 
-        console.log(fields);
+        if (!firstLineParsed) {
+            parseFirstRow(line, fields);
 
-        if (!firstLineParsed)
-            return parseFirstRow(line, fields);
+            // Don't return the header, if found
+            if (header)
+                return null;
+        }
 
         // Finish row
-        console.log("HOIDFNIK");
-        onStep(createDict(fields));
+        return createJson(fields);
     };
 
     const splitRows = function (line) {
         return line.match(/.+(\r?\n|\r|$)/g);
     };
 
+    const createResult = function (rowData) {
+        return new FileStreamerResult(header, rowData);
+    };
+
     const read = function () {
         let loaded = 0;
-        let step = 2048;
+        let step = 50;
         let totalSize = file.size;
         let start = 0;
         let progress = 0;
@@ -124,28 +150,46 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
             // Parse text
             let rows = splitRows(evt.target.result);
 
+            console.log(rows);
             // Complete previous incomplete row
             if (incompleteRow !== null) {
-                console.log("INCOMPLETE ROW!");
                 rows[0] = incompleteRow + rows[0];
                 incompleteRow = null;
             }
 
+            // Parse all rows
+            let jsonRows = [];
             for (const row of rows) {
-                parseRow(row);
+                let jsonRow = parseRow(row);
+
+                if (jsonRow !== null && jsonRow !== undefined && jsonRow !== "")
+                    jsonRows.push(parseRow(row));
+
+                // TODO: check here for the last row incomplete!
             }
 
+            if (jsonRows.length > 0)
+                onStep(createResult(jsonRows));
+
+            // Prepare for the second step
             loaded += step;
             progress = (loaded/totalSize) * 100;
 
             if (loaded <= totalSize) {
                 blob = file.slice(loaded, loaded + step);
-
                 fileReader.readAsText(blob);
             } else {
                 // completed
-                onComplete();
+                console.log(incompleteRow);
+                if (incompleteRow !== null && incompleteRow !== undefined && incompleteRow !== "") {
+                    console.log("INCOMPLETE ROW!");
+                    const lastRow = incompleteRow + "\n";
+                    incompleteRow = null;
+                    onStep(createResult([parseRow(lastRow)]));
+                }
+
                 loaded = totalSize;
+                onComplete();
             }
         };
 
@@ -160,7 +204,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 const parseFile = function (file) {
     const converter = new FileStreamConverter();
 
-    const stream = new FileStreamer(file, (result) => converter.convert(result), null, () => {alert("completed")});
+    const stream = new FileStreamer(file, (result) => converter.convert(result), null, () => converter.complete());
 };
 
 const AccountData = function (accountNumber) {
@@ -445,21 +489,27 @@ FileStreamConverter = function () {
         ];
 
         accounts[account].addLine(dataRow);
+
+        console.log(accounts);
     };
 
     // Covert the file stream
     this.convert = function (results) {
+        console.log(results);
+
         if (!bankMap) {
-            bankMap = BankMapping.recognizeBank(results.meta.fields);
+            bankMap = BankMapping.recognizeBank(results.fields);
             toastr.info("Bank recognized as " + bankMap.getBank());
         }
 
         for (let index = 0, line; line = results.data[index]; ++index) {
-            if (hasIndexErrors(index, results.errors))
-                continue;
+            // if (hasIndexErrors(index, results.errors))
+            //     continue;
 
             convertLine(line);
         }
+
+        console.log("Done converting");
     };
 
     // Handle occurred errors
@@ -469,10 +519,13 @@ FileStreamConverter = function () {
 
     // Completes the conversion and downloads the CSVs
     this.complete = function () {
+        console.log("complete");
         let keys = Object.keys(accounts);
 
         for (let index = 0, account; account = accounts[keys[index]]; ++index) {
             account.downloadCSV();
         }
+
+        // TODO: Clean data
     };
 };
