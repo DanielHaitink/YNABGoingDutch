@@ -85,8 +85,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         // TODO: row might not be complete with correct number of cols. Can have more data in last column.
         //  Wait for more data until newline is found or until no new data is streamed
 
-        // console.log(line);
-
         if (endsWithNewLine(line))
             return true;
 
@@ -109,6 +107,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
         if (! isRowComplete(line, fields)) {
             if (incompleteRow !== null) {
+                // TODO: check if this is possible
                 alert("INCOMPLETE ROW IS NOT NULL");
                 console.log(incompleteRow);
                 console.log(line);
@@ -119,6 +118,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         }
 
         if (!firstLineParsed) {
+            // TODO: test for errors
             parseFirstRow(line, fields);
 
             // Don't return the header, if found
@@ -126,12 +126,14 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
                 return null;
         }
 
+        // TODO: test for errors
+
         // Finish row
         return createJson(fields);
     };
 
     const splitRows = function (line) {
-        return line.match(/.+(\r?\n|\r|$)/g);
+        return line.match(/.*(\r?\n|\r|$)/g);
     };
 
     const createResult = function (rowData) {
@@ -204,7 +206,16 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 const parseFile = function (file) {
     const converter = new FileStreamConverter();
 
-    const stream = new FileStreamer(file, (result) => converter.convert(result), null, () => converter.complete());
+    const stream = new FileStreamer(file,
+        (result) => {
+            converter.convert(result);
+        },
+        null,
+        () => {
+            converter.complete();
+            document.getElementById("file").value = "";
+        }
+    );
 };
 
 const AccountData = function (accountNumber) {
