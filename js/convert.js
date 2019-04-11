@@ -10,16 +10,38 @@ const parse = () => {
         parseFile(file);
 };
 
-const FileStreamer = function (file, onStep, onError, onComplete) {
-    const FileStreamerResult = function (header, dataArray) {
-        this.fields = header;
-        this.data = dataArray;
-    };
+// Parse every file as a stream
+const parseFile = function (file) {
+    const converter = new FileStreamConverter();
 
+    const stream = new FileStreamer(file,
+        (result) => {
+            converter.convert(result);
+        },
+        null,
+        () => {
+            converter.complete();
+            document.getElementById("file").value = "";
+        }
+    );
+};
+
+const FileStreamer = function (file, onStep, onError, onComplete) {
     let header = null;
     let numberOfCols = 0;
     let firstLineParsed = false;
     let incompleteRow = null;
+    let errors = [];
+
+    const FileStreamerResultStep = function (dataArray) {
+        this.fields = header;
+        this.data = dataArray;
+    };
+
+    const FileStreamerResultComplete = function () {
+        this.file = file;
+        this.fields = header;
+    };
 
     const isHeader = function (line) {
         // Look for empty spaces, dates and IBAN numbers
@@ -137,7 +159,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     };
 
     const createResult = function (rowData) {
-        return new FileStreamerResult(header, rowData);
+        return new FileStreamerResultStep(rowData);
     };
 
     const read = function () {
@@ -166,8 +188,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
                 if (jsonRow !== null && jsonRow !== undefined && jsonRow !== "")
                     jsonRows.push(parseRow(row));
-
-                // TODO: check here for the last row incomplete!
             }
 
             if (jsonRows.length > 0)
@@ -200,22 +220,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     };
 
     read();
-};
-
-// Parse every file as a stream
-const parseFile = function (file) {
-    const converter = new FileStreamConverter();
-
-    const stream = new FileStreamer(file,
-        (result) => {
-            converter.convert(result);
-        },
-        null,
-        () => {
-            converter.complete();
-            document.getElementById("file").value = "";
-        }
-    );
 };
 
 const AccountData = function (accountNumber) {
@@ -529,14 +533,13 @@ FileStreamConverter = function () {
     };
 
     // Completes the conversion and downloads the CSVs
-    this.complete = function () {
-        console.log("complete");
+    this.complete = function (result) {
+        toastr.success(result.file + " is completed succesfully");
+
         let keys = Object.keys(accounts);
 
         for (let index = 0, account; account = accounts[keys[index]]; ++index) {
             account.downloadCSV();
         }
-
-        // TODO: Clean data
     };
 };
