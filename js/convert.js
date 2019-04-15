@@ -1,5 +1,5 @@
 if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
-    alert("The File APIs are not fully supported in this browser.");
+    alert("The File APIs are not fully supported in this browser. Please use a different browser");
 }
 
 // Parse all files added to the "file" button
@@ -18,7 +18,9 @@ const parseFile = function (file) {
         (result) => {
             converter.convert(result);
         },
-        null,
+        (error) => {
+            converter.handleError(error, file);
+        },
         () => {
             converter.complete();
             document.getElementById("file").value = "";
@@ -31,11 +33,15 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     let numberOfCols = 0;
     let firstLineParsed = false;
     let incompleteRow = null;
-    let errors = [];
 
-    const FileStreamerResultStep = function (dataArray) {
+    const FileRow = function (data, error) {
+        this.data = data;
+        this.error = error;
+    };
+
+    const FileStreamerResultStep = function (rows) {
         this.fields = header;
-        this.data = dataArray;
+        this.rows = rows;
     };
 
     const FileStreamerResultComplete = function () {
@@ -67,23 +73,14 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         return cleanedFields;
     };
 
-    const splitFields = function (line) {
+    const splitLineToFields = function (line) {
         const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
 
         let fields = line.match(splitFieldsRegex);
         return cleanFields(fields);
     };
 
-    const parseFirstRow = function (line, fields) {
-        firstLineParsed = true;
-        numberOfCols = fields.length;
-
-        if (isHeader(line)) {
-            header = fields;
-        }
-    };
-
-    const createJson = function (fields) {
+    const convertRowToJson = function (fields) {
         let dict = {};
 
         if (header !== null) {
@@ -103,55 +100,30 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         return (line.endsWith("\r") || line.endsWith("\n"));
     };
 
-    const isRowComplete = function (line, fields) {
-        // TODO: row might not be complete with correct number of cols. Can have more data in last column.
-        //  Wait for more data until newline is found or until no new data is streamed
-
-        if (endsWithNewLine(line))
-            return true;
-
-        // if (firstLineParsed && numberOfCols !== fields.length) {
-        //     // incomplete row
-        //     return false;
-        // } else if (!firstLineParsed) {
-        //     // this is the first line still. Needs to end with an newline
-        //     return false;
-        // }
-
-        return false;
-    };
-
-    const parseRow = function (line) {
-        if (line === null || line === "")
-            return null;
-
-        const fields = splitFields(line);
-
-        if (! isRowComplete(line, fields)) {
-            if (incompleteRow !== null) {
-                // TODO: check if this is possible
-                alert("INCOMPLETE ROW IS NOT NULL");
-                console.log(incompleteRow);
-                console.log(line);
-                console.log(fields);
-            }
-            incompleteRow = line;
-            return null;
-        }
+    const checkRowForErrors = function (line, fields) {
+        let error = null;
 
         if (!firstLineParsed) {
-            // TODO: test for errors
-            parseFirstRow(line, fields);
-
-            // Don't return the header, if found
-            if (header)
-                return null;
+            if (fields.length < numberOfCols)
+                error = "TooFewColumns";
+            else if (fields.length > numberOfCols)
+                error = "TooManyColumns";
         }
 
-        // TODO: test for errors
+        return error;
+    };
 
-        // Finish row
-        return createJson(fields);
+    const isRowComplete = function (line, fields) {
+        return endsWithNewLine(line);
+    };
+
+    const parseFirstRow = function (line, fields) {
+        firstLineParsed = true;
+        numberOfCols = fields.length;
+
+        if (isHeader(line)) {
+            header = fields;
+        }
     };
 
     const splitRows = function (line) {
@@ -162,64 +134,107 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         return new FileStreamerResultStep(rowData);
     };
 
-    const read = function () {
+    const fillIncompleteRow = function (rows) {
+        // Complete previous incomplete row
+        if (incompleteRow !== null) {
+            console.log("Was incomplete");
+            rows[0] = incompleteRow + rows[0];
+            incompleteRow = null;
+        }
+
+        return rows;
+    };
+
+    const parseRow = function (line) {
+        if (line === null || line === "")
+            return null;
+
+        const fields = splitLineToFields(line);
+
+        if (! isRowComplete(line, fields)) {
+            incompleteRow = line;
+            return null;
+        }
+
+        const error = checkRowForErrors(line, fields);
+
+        if (!firstLineParsed) {
+            parseFirstRow(line, fields);
+
+            // Don't return the header, if found
+            if (header)
+                return null;
+        }
+
+        // Finish row
+        return new FileRow(convertRowToJson(fields), error);
+    };
+
+    const parseRows = function (rows) {
+        // Parse all rows
+        let fileRows = [];
+        for (const row of rows) {
+            let fileRow = parseRow(row);
+
+            // TODO: fix errors. Probably not parsed correctly.
+
+            if (fileRow !== null && fileRow !== undefined)
+                fileRows.push(fileRow);
+        }
+
+        if (fileRows.length > 0)
+            onStep(createResult());
+    };
+
+    const completeStreaming = function () {
+        if (incompleteRow !== null && incompleteRow !== undefined && incompleteRow !== "") {
+            const lastRow = incompleteRow + "\n";
+            incompleteRow = null;
+            onStep(createResult([parseRow(lastRow)]));
+        }
+
+        onComplete(new FileStreamerResultComplete());
+    };
+
+    const streamFile = function () {
         let loaded = 0;
-        let step = 50;
+        let fileStepSize = 50;
         let totalSize = file.size;
         let start = 0;
         let progress = 0;
         let fileReader = new FileReader();
 
         fileReader.onload = function(evt) {
-            // Parse text
+            // Take result
             let rows = splitRows(evt.target.result);
-
             console.log(rows);
-            // Complete previous incomplete row
-            if (incompleteRow !== null) {
-                rows[0] = incompleteRow + rows[0];
-                incompleteRow = null;
-            }
+            // Check rows for not completed
+            rows = fillIncompleteRow(rows);
+            console.log(rows);
 
-            // Parse all rows
-            let jsonRows = [];
-            for (const row of rows) {
-                let jsonRow = parseRow(row);
-
-                if (jsonRow !== null && jsonRow !== undefined && jsonRow !== "")
-                    jsonRows.push(parseRow(row));
-            }
-
-            if (jsonRows.length > 0)
-                onStep(createResult(jsonRows));
+            parseRows(rows);
 
             // Prepare for the second step
-            loaded += step;
+            loaded += fileStepSize;
             progress = (loaded/totalSize) * 100;
 
             if (loaded <= totalSize) {
-                blob = file.slice(loaded, loaded + step);
+                // Parse the next part
+                blob = file.slice(loaded, loaded + fileStepSize);
                 fileReader.readAsText(blob);
             } else {
-                // completed
-                console.log(incompleteRow);
-                if (incompleteRow !== null && incompleteRow !== undefined && incompleteRow !== "") {
-                    console.log("INCOMPLETE ROW!");
-                    const lastRow = incompleteRow + "\n";
-                    incompleteRow = null;
-                    onStep(createResult([parseRow(lastRow)]));
-                }
-
+                // Completed streaming
                 loaded = totalSize;
-                onComplete();
+                console.log("COMPLETED");
+                completeStreaming();
             }
         };
 
-        let blob = file.slice(start, step);
+        let blob = file.slice(start, fileStepSize);
         fileReader.readAsText(blob);
     };
 
-    read();
+    streamFile();
 };
 
 const AccountData = function (accountNumber) {
@@ -482,10 +497,6 @@ FileStreamConverter = function () {
     const accounts = {}; // All the different account numbers in the file
     let bankMap = null; // The bank mapping for the file
 
-    const hasIndexErrors = function (index, errors) {
-        return errors[index] != null;
-    };
-
     // Convert the current CSV line
     const convertLine = function (line) {
         const account = bankMap.getAccount(line);
@@ -517,11 +528,14 @@ FileStreamConverter = function () {
             toastr.info("Bank recognized as " + bankMap.getBank());
         }
 
-        for (let index = 0, line; line = results.data[index]; ++index) {
-            // if (hasIndexErrors(index, results.errors))
-            //     continue;
+        for (let index = 0, line; line = results.rows[index]; ++index) {
+            // check for error
+            if (line.error != null)
+                continue;
 
-            convertLine(line);
+            console.log(line);
+
+            convertLine(line.data);
         }
 
         console.log("Done converting");
@@ -534,6 +548,8 @@ FileStreamConverter = function () {
 
     // Completes the conversion and downloads the CSVs
     this.complete = function (result) {
+         console.log(result);
+
         toastr.success(result.file + " is completed succesfully");
 
         let keys = Object.keys(accounts);
