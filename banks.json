@@ -1,6 +1,6 @@
 {
   "RABO": {
-    "bankCode": "RABO",
+    "bankName": "RABO",
     "header": [
       "IBAN/BBAN",
       "Munt",
@@ -55,8 +55,8 @@
     "negativeIndicator": "-",
     "separateIndicator": null
   },
-  "ING": {
-    "bankCode": "INGB",
+  "INGB": {
+    "bankName": "INGB",
     "header": [
       "Datum",
       "Naam / Omschrijving",
