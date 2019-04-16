@@ -6,7 +6,7 @@ if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
 const parse = () => {
     const files = document.getElementById("file").files;
 
-    for (const file of files)
+    for (let file of files)
         parseFile(file);
 };
 
@@ -14,15 +14,15 @@ const parse = () => {
 const parseFile = function (file) {
     const converter = new FileStreamConverter();
 
-    const stream = new FileStreamer(file,
+    new FileStreamer(file,
         (result) => {
             converter.convert(result);
         },
         (error) => {
             converter.handleError(error, file);
         },
-        () => {
-            converter.complete();
+        (result) => {
+            converter.complete(result);
             document.getElementById("file").value = "";
         }
     );
@@ -103,7 +103,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     const checkRowForErrors = function (line, fields) {
         let error = null;
 
-        if (!firstLineParsed) {
+        if (firstLineParsed) {
             if (fields.length < numberOfCols)
                 error = "TooFewColumns";
             else if (fields.length > numberOfCols)
@@ -137,7 +137,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     const fillIncompleteRow = function (rows) {
         // Complete previous incomplete row
         if (incompleteRow !== null) {
-            console.log("Was incomplete");
             rows[0] = incompleteRow + rows[0];
             incompleteRow = null;
         }
@@ -173,7 +172,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     const parseRows = function (rows) {
         // Parse all rows
         let fileRows = [];
-        for (const row of rows) {
+        for (let row of rows) {
             let fileRow = parseRow(row);
 
             // TODO: fix errors. Probably not parsed correctly.
@@ -183,7 +182,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         }
 
         if (fileRows.length > 0)
-            onStep(createResult());
+            onStep(createResult(fileRows));
     };
 
     const completeStreaming = function () {
@@ -197,40 +196,38 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     };
 
     const streamFile = function () {
-        let loaded = 0;
+        let loadedBytes = 0;
         let fileStepSize = 50;
-        let totalSize = file.size;
-        let start = 0;
-        let progress = 0;
+        let totalFileSize = file.size;
+        let streamingProgress = 0;
         let fileReader = new FileReader();
 
         fileReader.onload = function(evt) {
             // Take result
             let rows = splitRows(evt.target.result);
-            console.log(rows);
+
             // Check rows for not completed
             rows = fillIncompleteRow(rows);
-            console.log(rows);
 
+            // Parse all rows
             parseRows(rows);
 
             // Prepare for the second step
-            loaded += fileStepSize;
-            progress = (loaded/totalSize) * 100;
+            loadedBytes += fileStepSize;
+            streamingProgress = (loadedBytes/totalFileSize) * 100;
 
-            if (loaded <= totalSize) {
+            if (loadedBytes <= totalFileSize) {
                 // Parse the next part
-                blob = file.slice(loaded, loaded + fileStepSize);
+                blob = file.slice(loadedBytes, loadedBytes + fileStepSize);
                 fileReader.readAsText(blob);
             } else {
                 // Completed streaming
-                loaded = totalSize;
-                console.log("COMPLETED");
+                loadedBytes = totalFileSize;
                 completeStreaming();
             }
         };
 
-        let blob = file.slice(start, fileStepSize);
+        let blob = file.slice(0, fileStepSize);
         fileReader.readAsText(blob);
     };
 
@@ -249,10 +246,11 @@ const AccountData = function (accountNumber) {
     this.downloadCSV = function () {
         let blobText = "";
 
-        for (const line of csvData)
+        for (let line of csvData)
             blobText += line.join(";") + "\n";
 
-        const fileName = accountNumber + ".csv";
+        const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
+        const fileName = accountNumber + "_" + date + ".csv";
         const blob = new Blob([blobText], {
             type: "text/csv;charset=utf-8;"
         });
@@ -281,7 +279,7 @@ const Field = function (fieldList, splits, splitsKeep) {
     const getFields = function (line) {
         let returnLine = "";
 
-        for (const field of fieldList)
+        for (let field of fieldList)
             returnLine += line[field];
 
         return returnLine;
@@ -485,17 +483,18 @@ BankMapping.recognizeBank = function (header) {
     // Check the header
     for (let key in BankMapping.mappings) {
         if (BankMapping.mappings.hasOwnProperty(key)) {
-            if (areArraysEqual(header, BankMapping.mappings[key].header))
-                return new BankMapping(key);
+            if (header)
+                if (areArraysEqual(header, BankMapping.mappings[key].header))
+                    return new BankMapping(key);
         }
     }
-    toastr.error("File could not be parsed");
 };
 
 // Converts a streamed CSV file to the desired format
 FileStreamConverter = function () {
     const accounts = {}; // All the different account numbers in the file
     let bankMap = null; // The bank mapping for the file
+    let failedConversion = false;
 
     // Convert the current CSV line
     const convertLine = function (line) {
@@ -515,16 +514,22 @@ FileStreamConverter = function () {
         ];
 
         accounts[account].addLine(dataRow);
-
-        console.log(accounts);
     };
 
     // Covert the file stream
     this.convert = function (results) {
-        console.log(results);
+        if (failedConversion)
+            return;
 
         if (!bankMap) {
             bankMap = BankMapping.recognizeBank(results.fields);
+
+            if (!bankMap) { // Failed recognizing bank
+                toastr.error("Bank could not be recognized!");
+                failedConversion = true;
+                return;
+            }
+
             toastr.info("Bank recognized as " + bankMap.getBank());
         }
 
@@ -533,26 +538,26 @@ FileStreamConverter = function () {
             if (line.error != null)
                 continue;
 
-            console.log(line);
-
             convertLine(line.data);
         }
-
-        console.log("Done converting");
     };
 
     // Handle occurred errors
     this.handleError = function (error, file) {
-        toastr.error("An error occurred in file " + file + ": " + error);
+        if (failedConversion)
+            return;
+
+        toastr.error("An error occurred in file " + file.name + ": " + error);
     };
 
     // Completes the conversion and downloads the CSVs
     this.complete = function (result) {
-         console.log(result);
+        if (failedConversion)
+            return;
 
-        toastr.success(result.file + " is completed succesfully");
+        toastr.success(result.file.name + " is completed successfully");
 
-        let keys = Object.keys(accounts);
+        const keys = Object.keys(accounts);
 
         for (let index = 0, account; account = accounts[keys[index]]; ++index) {
             account.downloadCSV();
