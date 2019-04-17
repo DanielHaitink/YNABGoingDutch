@@ -1,5 +1,5 @@
 {
-  "RABO": {
+  "Rabobank": {
     "bankName": "RABO",
     "header": [
       "IBAN/BBAN",
@@ -55,7 +55,7 @@
     "negativeIndicator": "-",
     "separateIndicator": null
   },
-  "INGB": {
+  "ING Bank": {
     "bankName": "INGB",
     "header": [
       "Datum",
@@ -93,5 +93,33 @@
     "separateIndicator": [
       "Af Bij"
     ]
+  },
+  "ASN Bank": {
+    "bankName": "ASNB",
+    "header": null,
+    "account": [1],
+    "date": [0],
+    "dateFormat": "DD-MM-YYYY",
+    "payee": [3],
+    "category": [],
+    "memo": [16, 17],
+    "outflow": [10],
+    "inflow": [10],
+    "positiveIndicator": null,
+    "negativeIndicator": "-"
+  },
+  "SNS Bank": {
+    "bankName": "SNSB",
+    "header": null,
+    "account": [1],
+    "date": [0],
+    "dateFormat": "DD-MM-YYYY",
+    "payee": [3],
+    "category": [],
+    "memo": [16, 17],
+    "outflow": [10],
+    "inflow": [10],
+    "positiveIndicator": null,
+    "negativeIndicator": "-"
   }
 }
