@@ -2,12 +2,24 @@ if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
     alert("The File APIs are not fully supported in this browser. Please use a different browser");
 }
 
-// Parse all files added to the "file" button
-const parse = () => {
-    const files = document.getElementById("file").files;
+let bankMap = null;
 
-    for (let file of files)
-        parseFile(file);
+// Parse all files added to the "file" button
+const parse = function () {
+    const parseFiles = function () {
+        const files = document.getElementById("file").files;
+
+        for (let file of files)
+            parseFile(file);
+    };
+
+    // Load JSON before parsing files
+    if (bankMap === null) {
+        bankMap = new BankMap("banks.json", () => parseFiles());
+    }
+    else {
+        parseFiles();
+    }
 };
 
 // Parse every file as a stream
@@ -275,8 +287,38 @@ const AccountData = function (accountNumber) {
     };
 };
 
-const Field = function (fieldList, splits, splitsKeep) {
-    const getFields = function (line) {
+const BankMap = function (file, onComplete) {
+    this.mapping = null;
+
+    const loadJsonFile = function () {
+        const rawFile = new XMLHttpRequest();
+
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4 && rawFile.status == "200") {
+                setMapping(rawFile.responseText);
+            }
+        };
+
+        rawFile.send(null);
+    };
+
+    const setMapping = (text) => {
+        this.mapping = JSON.parse(text);
+
+        onComplete();
+    };
+
+    loadJsonFile();
+};
+
+const BankMapper = function (bank) {
+    const DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
+    const map = bankMap.mapping[bank];
+
+    const getLine = function (line, fieldList) {
         let returnLine = "";
 
         for (let field of fieldList)
@@ -285,65 +327,23 @@ const Field = function (fieldList, splits, splitsKeep) {
         return returnLine;
     };
 
-    // Return the line of the CSV
-    this.getLine = function (line) {
-        let text = getFields(line);
-
-        // Quick fix for INGB
-        if (Array.isArray(splits) && Array.isArray(splitsKeep)) {
-            for (let key in splits) {
-                if (splits.hasOwnProperty(key))
-                    text = text.replace(splits[key] + ":", "|" + splits[key] + ":");
-            }
-            let explodedText = text.split("|");
-
-            let items = {};
-            for (let index in explodedText) {
-                let match = explodedText[index].match(/^[a-zA-Z]*:/);
-
-                if (match === null) {
-                    continue;
-                }
-                match = match[0];
-                items[match.substring(0, match.length - 1)] = explodedText[index].trim();
-            }
-
-            let textKeep = "";
-            for (let key in splitsKeep) {
-                if (splitsKeep.hasOwnProperty(key)) {
-                    if (items[splitsKeep[key]] === undefined) {
-                        continue;
-                    }
-                    if (textKeep !== "") {
-                        textKeep += " | ";
-                    }
-                    textKeep += items[splitsKeep[key]];
-                }
-            }
-            return textKeep;
-        }
-        return text;
-    };
-};
-
-const BankMapping = function (bank) {
-    // Get the bank type of this BankMapping
+    // Get the bank type of this BankMapper
     this.getBank = () => {
         return bank;
     };
 
     // Get the account number of the current line
     this.getAccount = function (line) {
-        return BankMapping.mappings[bank].account.getLine(line);
+        return getLine(line, map.account);
     };
 
     // Return the date in the european format of the current line(DD-MM-YYYY)
     this.getDate = function (line) {
-        const dateField = BankMapping.mappings[bank].date;
-        const text = dateField.getLine(line);
-        const dateFormat = BankMapping.mappings[bank].dateFormat;
+        const dateField = map.date;
+        const text = getLine(line, dateField);
+        const dateFormat = map.dateFormat;
 
-        if (dateFormat === BankMapping.DEFAULT_DATE_FORMAT)
+        if (dateFormat === DEFAULT_DATE_FORMAT)
             return text;
 
         let year = "";
@@ -368,37 +368,35 @@ const BankMapping = function (bank) {
 
     // Get the payee of the current line
     this.getPayee = function (line) {
-        return BankMapping.mappings[bank].payee.getLine(line);
+        return getLine(line, map.payee);
     };
 
     // Get the category of the current line
     this.getCategory = function (line) {
-        return BankMapping.mappings[bank].category.getLine(line);
+        return getLine(line, map.category);
     };
 
     // Get the memo of the current line
     this.getMemo = function (line) {
-        return BankMapping.mappings[bank].memo.getLine(line);
+        return getLine(line, map.memo);
     };
 
     // Check whether the indicator is positive or negative
     const isIndicatorPositive = function (indicatorField) {
-        return indicatorField.includes(BankMapping.mappings[bank].positiveIndicator);
-
+        return indicatorField.includes(map.positiveIndicator);
     };
 
     // Get the inflow of the current line
     this.getInflow = function (line) {
-        const bankMap = BankMapping.mappings[bank];
-        let value = bankMap.inflow.getLine(line);
+        let value = getLine(line, map.inflow);
         let indicator = value;
 
-        if (bankMap.separateIndicator != null)
-            indicator = bankMap.separateIndicator.getLine(line);
+        if (map.separateIndicator != null)
+            indicator = getLine(line, map.separateIndicator);
 
         if (isIndicatorPositive(indicator)) {
-            if (bankMap.separateIndicator != null)
-                value = value.replace(bankMap.positiveIndicator, "");
+            if (map.separateIndicator != null)
+                value = value.replace(map.positiveIndicator, "");
 
             value = value.replace(",", ".");
             return value;
@@ -409,16 +407,15 @@ const BankMapping = function (bank) {
 
     // Get the outflow of the current line
     this.getOutflow = function (line) {
-        const bankMap = BankMapping.mappings[bank];
-        let value = bankMap.outflow.getLine(line);
+        let value = getLine(line, map.outflow);
         let indicator = value;
 
-        if (bankMap.separateIndicator != null)
-            indicator = bankMap.separateIndicator.getLine(line);
+        if (map.separateIndicator != null)
+            indicator = getLine(line, map.separateIndicator);
 
         if (!isIndicatorPositive(indicator)) {
-            if (bankMap.separateIndicator != null)
-                value = value.replace(bankMap.negativeIndicator, "");
+            if (map.separateIndicator != null)
+                value = value.replace(map.negativeIndicator, "");
             if (value.startsWith("-"))
                 value = value.replace("-", "");
 
@@ -430,48 +427,7 @@ const BankMapping = function (bank) {
     };
 };
 
-BankMapping.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
-BankMapping.mappings = {
-    RABO: {
-        bankName: "RABO",
-        header: ["IBAN/BBAN", "Munt", "BIC", "Volgnr", "Datum", "Rentedatum", "Bedrag", "Saldo na trn",
-            "Tegenrekening IBAN/BBAN", "Naam tegenpartij", "Naam uiteindelijke partij", "Naam initi�rende partij",
-            "BIC tegenpartij", "Code", "Batch ID", "Transactiereferentie", "Machtigingskenmerk", "Incassant ID",
-            "Betalingskenmerk", "Omschrijving-1", "Omschrijving-2", "Omschrijving-3", "Reden retour", "Oorspr bedrag",
-            "Oorspr munt", "Koers"],
-        account: new Field(["IBAN/BBAN"]),
-        date: new Field(["Datum"]),
-        dateFormat: "YYYY-MM-DD",
-        payee: new Field(["Naam tegenpartij"]),
-        category: new Field([]),
-        memo: new Field(["Omschrijving-1", "Omschrijving-2", "Omschrijving-3"]),
-        outflow: new Field(["Bedrag"]),
-        inflow: new Field(["Bedrag"]),
-        positiveIndicator: "+",
-        negativeIndicator: "-",
-    },
-    INGB: {
-        bankName: "INGB",
-        header: ["Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"],
-        account: new Field(["Rekening"]),
-        date: new Field(["Datum"]),
-        dateFormat: "YYYYMMDD",
-        payee: new Field(["Naam / Omschrijving"]),
-        category: new Field([]),
-        memo: new Field(
-            ["Mededelingen"],
-            ['Transactie', 'Term', 'Pasvolgnr', 'Omschrijving', 'IBAN', 'Kenmerk', 'Machtiging ID', 'Incassant ID'],
-            ['Transactie', 'Term', 'Omschrijving', 'IBAN', 'Kenmerk']),
-        outflow: new Field(["Bedrag (EUR)"]),
-        inflow: new Field(["Bedrag (EUR)"]),
-        positiveIndicator: "Bij",
-        negativeIndicator: "Af",
-        separateIndicator: new Field(["Af Bij"])
-    }
-};
-
-// Recognize the bank using the header
-BankMapping.recognizeBank = function (header) {
+BankMapper.recognizeBank = function (header) {
     const areArraysEqual = (arrayOne, arrayTwo) => {
         for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
             if (itemOne !== itemTwo)
@@ -481,36 +437,40 @@ BankMapping.recognizeBank = function (header) {
     };
 
     // Check the header
-    for (let key in BankMapping.mappings) {
-        if (BankMapping.mappings.hasOwnProperty(key)) {
-            if (header)
-                if (areArraysEqual(header, BankMapping.mappings[key].header))
-                    return new BankMapping(key);
+    for (let key in bankMap.mapping) {
+        if (bankMap.mapping.hasOwnProperty(key)) {
+            if (header) {
+                if (areArraysEqual(header, bankMap.mapping[key].header)) {
+                    return new BankMapper(key);
+                }
+            }
         }
     }
+
+    throw "CouldNotBeRecognized";
 };
 
 // Converts a streamed CSV file to the desired format
 FileStreamConverter = function () {
     const accounts = {}; // All the different account numbers in the file
-    let bankMap = null; // The bank mapping for the file
+    let bankMapper = null; // The bank mapping for the file
     let failedConversion = false;
 
     // Convert the current CSV line
     const convertLine = function (line) {
-        const account = bankMap.getAccount(line);
+        const account = bankMapper.getAccount(line);
 
         // If account has not been seen before, create new account
         if (accounts[account] == null)
             accounts[account] = new AccountData(account);
 
         const dataRow = [
-            bankMap.getDate(line),
-            bankMap.getPayee(line),
-            bankMap.getCategory(line),
-            bankMap.getMemo(line),
-            bankMap.getOutflow(line),
-            bankMap.getInflow(line)
+            bankMapper.getDate(line),
+            bankMapper.getPayee(line),
+            bankMapper.getCategory(line),
+            bankMapper.getMemo(line),
+            bankMapper.getOutflow(line),
+            bankMapper.getInflow(line)
         ];
 
         accounts[account].addLine(dataRow);
@@ -521,16 +481,17 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
-        if (!bankMap) {
-            bankMap = BankMapping.recognizeBank(results.fields);
+        if (!bankMapper) {
+            try {
+                bankMapper = BankMapper.recognizeBank(results.fields);
 
-            if (!bankMap) { // Failed recognizing bank
+                toastr.info("Bank recognized as " + bankMapper.getBank());
+            } catch (e) {
                 toastr.error("Bank could not be recognized!");
+
                 failedConversion = true;
                 return;
             }
-
-            toastr.info("Bank recognized as " + bankMap.getBank());
         }
 
         for (let index = 0, line; line = results.rows[index]; ++index) {
