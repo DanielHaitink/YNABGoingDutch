@@ -89,6 +89,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
 
         let fields = line.match(splitFieldsRegex);
+
         return cleanFields(fields);
     };
 
@@ -186,8 +187,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         let fileRows = [];
         for (let row of rows) {
             let fileRow = parseRow(row);
-
-            // TODO: fix errors. Probably not parsed correctly.
 
             if (fileRow !== null && fileRow !== undefined)
                 fileRows.push(fileRow);
@@ -381,9 +380,27 @@ const BankMapper = function (bank) {
         return getLine(line, map.memo);
     };
 
-    // Check whether the indicator is positive or negative
+    // Check whether the indicator is positive
     const isIndicatorPositive = function (indicatorField) {
+        if (!map.positiveIndicator) {
+            if (!map.negativeIndicator)
+                throw "NoIndicatorsError";
+            // Check for negative indicator
+            return !isIndicatorNegative(indicatorField);
+        }
+
         return indicatorField.includes(map.positiveIndicator);
+    };
+
+    // Check whether the indicator is negative
+    const isIndicatorNegative = function (indicatorField) {
+        if (!map.negativeIndicator) {
+            if (!map.positiveIndicator)
+                throw "NoIndicatorsError";
+            return !isIndicatorPositive(indicatorField);
+        }
+
+        return indicatorField.includes(map.negativeIndicator);
     };
 
     // Get the inflow of the current line
@@ -391,12 +408,15 @@ const BankMapper = function (bank) {
         let value = getLine(line, map.inflow);
         let indicator = value;
 
-        if (map.separateIndicator != null)
+        if (map.separateIndicator)
             indicator = getLine(line, map.separateIndicator);
 
         if (isIndicatorPositive(indicator)) {
-            if (map.separateIndicator != null)
+            if (!map.separateIndicator && map.positiveIndicator)
                 value = value.replace(map.positiveIndicator, "");
+
+            if (value.startsWith("+"))
+                value = value.replace("+", "");
 
             value = value.replace(",", ".");
             return value;
@@ -410,12 +430,13 @@ const BankMapper = function (bank) {
         let value = getLine(line, map.outflow);
         let indicator = value;
 
-        if (map.separateIndicator != null)
+        if (map.separateIndicator)
             indicator = getLine(line, map.separateIndicator);
 
-        if (!isIndicatorPositive(indicator)) {
-            if (map.separateIndicator != null)
+        if (isIndicatorNegative(indicator)) {
+            if (!map.separateIndicator && map.negativeIndicator)
                 value = value.replace(map.negativeIndicator, "");
+
             if (value.startsWith("-"))
                 value = value.replace("-", "");
 
@@ -439,10 +460,24 @@ BankMapper.recognizeBank = function (header) {
     // Check the header
     for (let key in bankMap.mapping) {
         if (bankMap.mapping.hasOwnProperty(key)) {
-            if (header) {
-                if (areArraysEqual(header, bankMap.mapping[key].header)) {
+            if (areArraysEqual(header, bankMap.mapping[key].header)) {
+                return new BankMapper(key);
+            }
+        }
+    }
+
+    throw "CouldNotBeRecognized";
+};
+
+BankMapper.recognizeBankHeaderless = function (fields) {
+    for (let key in bankMap.mapping) {
+        if (bankMap.mapping.hasOwnProperty(key)) {
+            const ibanRegex = RegExp("[A-Z]{2}\\d{2}" + bankMap.mapping[key].bankName + "\\d{10}", "g");
+
+            const accountColumns = bankMap.mapping[key].account;
+            for (let col of accountColumns) {
+                if (ibanRegex.test(fields[col]))
                     return new BankMapper(key);
-                }
             }
         }
     }
@@ -481,9 +516,13 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
+        // Init the BankMapper is none is created yet
         if (!bankMapper) {
             try {
-                bankMapper = BankMapper.recognizeBank(results.fields);
+                if (results.fields) // Headered file
+                    bankMapper = BankMapper.recognizeBank(results.fields);
+                else // Headerless file
+                    bankMapper = BankMapper.recognizeBankHeaderless(results.rows[0].data);
 
                 toastr.info("Bank recognized as " + bankMapper.getBank());
             } catch (e) {
@@ -494,9 +533,10 @@ FileStreamConverter = function () {
             }
         }
 
+        // Loop through all the data
         for (let index = 0, line; line = results.rows[index]; ++index) {
             // check for error
-            if (line.error != null)
+            if (line.error !== null)
                 continue;
 
             convertLine(line.data);
