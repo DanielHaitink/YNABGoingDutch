@@ -188,8 +188,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         for (let row of rows) {
             let fileRow = parseRow(row);
 
-            // TODO: fix errors. Probably not parsed correctly.
-
             if (fileRow !== null && fileRow !== undefined)
                 fileRows.push(fileRow);
         }
@@ -518,6 +516,7 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
+        // Init the BankMapper is none is created yet
         if (!bankMapper) {
             try {
                 if (results.fields) // Headered file
@@ -534,9 +533,10 @@ FileStreamConverter = function () {
             }
         }
 
+        // Loop through all the data
         for (let index = 0, line; line = results.rows[index]; ++index) {
             // check for error
-            if (line.error != null)
+            if (line.error !== null)
                 continue;
 
             convertLine(line.data);
