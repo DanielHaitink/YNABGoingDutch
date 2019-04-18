@@ -524,9 +524,9 @@ FileStreamConverter = function () {
                 else // Headerless file
                     bankMapper = BankMapper.recognizeBankHeaderless(results.rows[0].data);
 
-                toastr.info("Bank recognized as " + bankMapper.getBank());
+                // notie.alert({type: "info", text: "Bank recognized as " + bankMapper.getBank(), position: "bottom"});
             } catch (e) {
-                toastr.error("Bank could not be recognized!");
+                notie.alert({type: "error", text: "Bank could not be recognized!", position: "bottom"});
 
                 failedConversion = true;
                 return;
@@ -548,7 +548,7 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
-        toastr.error("An error occurred in file " + file.name + ": " + error);
+        notie.alert({type: "error", text: "An error occurred in file " + file.name + ": " + error, position: "bottom"});
     };
 
     // Completes the conversion and downloads the CSVs
@@ -556,7 +556,8 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
-        toastr.success(result.file.name + " is completed successfully");
+        notie.alert({type: "success", text: result.file.name + " is completed successfully. Converted as " +
+                bankMapper.getBank(), position: "bottom"});
 
         const keys = Object.keys(accounts);
 
