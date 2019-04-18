@@ -208,7 +208,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
     const streamFile = function () {
         let loadedBytes = 0;
-        let fileStepSize = 50;
+        let fileStepSize = 2048;
         let totalFileSize = file.size;
         let streamingProgress = 0;
         let fileReader = new FileReader();
