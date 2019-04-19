@@ -13,26 +13,30 @@
     <link rel="stylesheet" href="css/notie.min.css">
 </head>
 <body>
-<header id="YNABheader">
+<header>
     <h1>YNAB Going Dutch</h1><br>
     <h3>Converts your Dutch bank statements from their CSV to YNAB CSV format</h3>
 </header>
 
-<div class="row">
-    <div class="column" id="header-col">
-        Column 1
-        <div>
-            <input type="file" id="file" name="file" multiple onchange="parse()"/>
-            <output id="list"></output>
-        </div>
-    </div>
-    <div class="column" id="headerless-col">
-        Column 2
+<div>
+    This tool is created to automatically detect and convert your CSV files to a format that is used by "You Need A Budget" (YNAB). <br> <br>
+    Usage is simple: Download the CSV file of your supported bank (this csv can contain information about multiple accounts), throw it in the converter, the converter will automatically prompt a download with the converted file.
+</div>
+
+<div id="fileInput" class="center">
+    <div>
+        <input type="file" id="file" name="file" multiple onchange="parse()"/>
+        <output id="list"></output>
     </div>
 </div>
 
 <footer>
-    Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a>.
+    <div class="center">
+        Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a>. <br>
+        <div class="small">
+            Created by Daniël Haitink. <br>
+        </div>
+    </div>
 </footer>
 
 

@@ -1,10 +1,27 @@
 body {
-    width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: gray;
-    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    width: 600px;
+    margin: auto;
+    background-color: #343a40;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     color: white;
+    font-weight: lighter;
+}
+
+h1 {
+    font-weight: 500;
+    font-size: 50px;
+}
+
+h2 {
+    font-weight: normal;
+}
+
+h3 {
+    font-weight: normal;
+}
+
+h4 {
+    font-weight: bold;
 }
 
 a {
@@ -20,57 +37,57 @@ a:visited {
 }
 
 a:hover {
-    color: mediumblue;
+    color: white;
 }
 
 a:active {
-    color: mediumblue;
+    color: white;
 }
 
 header {
-    height: 200px;
-    /*background-color: rebeccapurple;*/
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 footer {
+padding-top: 60px;
+height: 100px;
+}
+
+#YNABheader {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#fileInput {
     height: 100px;
-    /*background-color: blue;*/
 }
 
-.row {
-    display: flex;
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+    text-align: center;
 }
 
-.column {
-    flex: 50%;
-    /*width: 50%;*/
-}
-
-#header-col {
-    /*background-color: fuchsia;*/
-    height: 300px;
-}
-
-#headerless-col {
-    /*background-color: #1c7430;*/
-    height: 300px;
-}
-
-@media screen and (max-width: 1000px) {
-    body {
-        width: 600px;
-    }
+.small {
+    font-weight: lighter;
+    font-size: 12px;
 }
 
 @media screen and (max-width: 600px) {
     body {
-        margin-right: unset;
-        margin-left: unset;
-        width: 600px;
+        margin: auto;
+        width: 100%;
     }
 
-    .column {
-        float: none;
-        flex: 100%;
+    header {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    h1 {
+        font-size: 40px;
     }
 }
