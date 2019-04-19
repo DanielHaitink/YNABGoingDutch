@@ -90,9 +90,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
         let fields = line.match(splitFieldsRegex);
 
-        if (fields.length != numberOfCols)
-            console.log(fields);
-
         return cleanFields(fields);
     };
 
