@@ -257,8 +257,15 @@ const AccountData = function (accountNumber) {
     this.downloadCSV = function () {
         let blobText = "";
 
-        for (let line of csvData)
-            blobText += line.join(";") + "\n";
+        for (let line of csvData) {
+            for (let item of line) {
+                blobText += "\"" + item + "\"";
+
+                if (item !== line[line.length - 1])
+                    blobText += ",";
+            }
+            blobText += "\r\n";
+        }
 
         const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
         const fileName = accountNumber + "_" + date + ".csv";
