@@ -68,12 +68,12 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     };
 
     const isFillerLine = function (line) {
-      const fillerCutoff = 2; // Account for newlines
-      const notBlank = function (value) {
-        return String(value).length > 0;
-      }
-      const result = splitLineToFields(line).filter(notBlank);
-      return result.length <= fillerCutoff;
+        const fillerCutoff = 2; // Account for newlines
+        const notBlank = function (value) {
+            return String(value).length > 0;
+        }
+        const result = splitLineToFields(line).filter(notBlank);
+        return result.length <= fillerCutoff;
     };
 
     const cleanFields = function (fields) {
@@ -174,7 +174,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
             return null;
 
         if (!firstLineParsed && isFillerLine(line))
-          return null;
+            return null;
 
         const fields = splitLineToFields(line);
 
