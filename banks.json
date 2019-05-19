@@ -1,4 +1,49 @@
 {
+  "KNAB": {
+    "bankName": "KNAB",
+    "header": [
+      "Rekeningnummer",
+      "Transactiedatum",
+      "Valutacode",
+      "CreditDebet",
+      "Bedrag",
+      "Tegenrekeningnummer",
+      "Tegenrekeninghouder",
+      "Valutadatum",
+      "Betaalwijze",
+      "Omschrijving",
+      "Type betaling",
+      "Machtigingsnummer",
+      "Incassant ID",
+      "Adres",
+      "Referentie",
+      "Boekdatum",
+      ""
+    ],
+    "account": [
+      "Rekeningnummer"
+    ],
+    "date": [
+      "Transactiedatum"
+    ],
+    "dateFormat": "DD-MM-YYYY",
+    "payee": [
+      "Tegenrekeninghouder"
+    ],
+    "category": [],
+    "memo": [
+      "Omschrijving"
+    ],
+    "outflow": [
+      "Bedrag"
+    ],
+    "inflow": [
+      "Bedrag"
+    ],
+    "positiveIndicator": "C",
+    "negativeIndicator": "D",
+    "separateIndicator": ["CreditDebet"]
+  },
   "Rabobank": {
     "bankName": "RABO",
     "header": [
