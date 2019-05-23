@@ -11,6 +11,12 @@
 
     <link rel="stylesheet" href="css/YNAB.css">
     <link rel="stylesheet" href="css/notie.min.css">
+
+    <script type="javascript">
+        if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+            alert("The File APIs are not fully supported in this browser. Please use a different browser");
+        }
+    </script>
 </head>
 <body>
 <header>
@@ -18,27 +24,33 @@
     <h3>Converts your Dutch bank statements from their CSV to YNAB CSV format</h3>
 </header>
 
-<div>
-    This tool is created to automatically detect and convert your CSV files to a format that is used by "You Need A Budget" (YNAB). <br> <br>
-    Usage is simple: Download the CSV file of your supported bank (this csv can contain information about multiple accounts), throw it in the converter, the converter will automatically prompt a download with the converted file.
-</div>
+<div id="content">
+    <div id="info">
+        This tool is created to automatically your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
+        <br><br>Your CSV will instantly download upon file selection.
+    </div>
 
-<div id="fileInput" class="center">
-    <div>
-        <input type="file" id="file" name="file" multiple onchange="parse()"/>
-        <output id="list"></output>
+    <div id="drop-area">
+        <input id="drop-input" type="file" multiple onchange="parse()">
+        <div id="drop-text">
+            Drop your files in here!<br>Or click here to select files
+        </div>
+    </div>
+
+    <div id="supported">
+        <h4>Supported Banks</h4>
+        Rabobank - ING - ASN Bank - SNS Bank
     </div>
 </div>
 
 <footer>
     <div class="center">
-        Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a>. <br>
+        Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a><br>
         <div class="small">
-            Created by Daniël Haitink. <br>
+            Created by <a href="https://www.danielhaitink.nl">Daniël Haitink</a>
         </div>
     </div>
 </footer>
-
 
 <script src="js/notie/notie.min.js"></script>
 <script src="js/convert.js"></script>
