@@ -11,8 +11,10 @@ Everything is done locally. Your information never leaves your own computer.
 YNAB Going Dutch will automatically recognize your bank, and convert it correctly!
 
 Currently the banks that are supported are:
- - RaboBank
+ - Rabobank
  - ING bank
+ - ASN bank
+ - SNS bank
 
  If you want support for your bank, please create a github issue, or contact me some other way.
  You are also welcome to fork the repo and add support yourself! Please create a pull request if you want your code to be added.
