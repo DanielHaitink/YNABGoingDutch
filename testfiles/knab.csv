@@ -1,0 +1,3 @@
+KNAB EXPORT;;;;;;;;;;;;;;;;
+Rekeningnummer;Transactiedatum;Valutacode;CreditDebet;Bedrag;Tegenrekeningnummer;Tegenrekeninghouder;Valutadatum;Betaalwijze;Omschrijving;Type betaling;Machtigingsnummer;Incassant ID;Adres;Referentie;Boekdatum;
+"NL27KNAB1234567890";"17-05-2019";"EUR";"D";"13,75";" ";"CCV*BURGER BAR RBS BV";"17-05-2019";"Betaalautomaat";"AMSTERDAM 17-05-2019 00:00 Pas: 1234";"";"";"";"";"B9E17AG0G5000068";"17-05-2019";

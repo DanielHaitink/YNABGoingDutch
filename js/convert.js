@@ -113,6 +113,17 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         return !isNotHeaderRegex.test(line);
     };
 
+    const isFillerLine = function (line) {
+        const fillerCutoff = 2; // Account for newlines
+       
+        const notBlank = (value) => {
+            return String(value).length > 0;
+        }
+        
+        const result = splitLineToFields(line).filter(notBlank);
+        return result.length <= fillerCutoff;
+    };
+
     const cleanFields = function (fields) {
         let cleanedFields = [];
 
@@ -132,7 +143,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     };
 
     const splitLineToFields = function (line) {
-        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
+        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,|;"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
 
         let fields = line.match(splitFieldsRegex);
 
@@ -205,6 +216,9 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
     const parseRow = function (line) {
         if (line === null || line === "")
+            return null;
+
+        if (!firstLineParsed && isFillerLine(line))
             return null;
 
         const fields = splitLineToFields(line);
@@ -513,6 +527,7 @@ BankMapper.recognizeBank = function (header) {
     };
 
     // Check the header
+
     for (let key in bankMap.getMapping()) {
         if (bankMap.getMapping().hasOwnProperty(key)) {
             if (areArraysEqual(header, bankMap.getMapping()[key].header)) {
