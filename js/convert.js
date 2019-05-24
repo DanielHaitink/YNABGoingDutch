@@ -1,16 +1,63 @@
-if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
-    alert("The File APIs are not fully supported in this browser. Please use a different browser");
-}
-
 let bankMap = null;
+
+const DropArea = function(onDrop) {
+    const dropArea = document.getElementById(DropArea.ID);
+
+    const preventDefaults = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const addHighlight = (e) => {
+        dropArea.classList.add("highlight")
+    };
+
+    const removeHighlight = (e) => {
+        dropArea.classList.remove("highlight")
+    };
+
+    const handleDrop = (e) => {
+        const dataTransfer = e.dataTransfer;
+
+        onDrop(dataTransfer.files);
+    };
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(
+        eventName => dropArea.addEventListener(eventName, preventDefaults, false));
+
+    ['dragenter', 'dragover'].forEach(
+        eventName => dropArea.addEventListener(eventName, addHighlight, false));
+
+    ['dragleave', 'drop'].forEach(
+        eventName => dropArea.addEventListener(eventName, removeHighlight, false));
+
+    dropArea.addEventListener("drop", handleDrop, false);
+};
+DropArea.ID = "drop-area";
+
+new DropArea((files) => {
+    const parseFiles = () => {
+        for (const file of files)
+            parseFile(file);
+    };
+
+    if (bankMap === null) {
+        bankMap = new BankMap("banks.json", () => parseFiles());
+    }
+    else {
+        parseFiles();
+    }
+});
 
 // Parse all files added to the "file" button
 const parse = function () {
-    const parseFiles = function () {
-        const files = document.getElementById("file").files;
+    const input = document.getElementById("drop-input");
 
-        for (let file of files)
+    const parseFiles = () => {
+        for (const file of input.files)
             parseFile(file);
+
+        input.value = "";
     };
 
     // Load JSON before parsing files
@@ -35,7 +82,6 @@ const parseFile = function (file) {
         },
         (result) => {
             converter.complete(result);
-            document.getElementById("file").value = "";
         }
     );
 };
@@ -69,9 +115,11 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
 
     const isFillerLine = function (line) {
         const fillerCutoff = 2; // Account for newlines
-        const notBlank = function (value) {
+       
+        const notBlank = (value) => {
             return String(value).length > 0;
         }
+        
         const result = splitLineToFields(line).filter(notBlank);
         return result.length <= fillerCutoff;
     };
@@ -98,9 +146,6 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
         const splitFieldsRegex = /("(?:[^"]|"")*"|[^,|;"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
 
         let fields = line.match(splitFieldsRegex);
-
-        if (fields.length != numberOfCols)
-            console.log(fields);
 
         return cleanFields(fields);
     };
@@ -200,7 +245,7 @@ const FileStreamer = function (file, onStep, onError, onComplete) {
     const parseRows = function (rows) {
         // Parse all rows
         let fileRows = [];
-        for (let row of rows) {
+        for (const row of rows) {
             let fileRow = parseRow(row);
 
             if (fileRow !== null && fileRow !== undefined)
@@ -272,8 +317,8 @@ const AccountData = function (accountNumber) {
     this.downloadCSV = function () {
         let blobText = "";
 
-        for (let line of csvData) {
-            for (let item of line) {
+        for (const line of csvData) {
+            for (const item of line) {
                 blobText += "\"" + item + "\"";
 
                 if (item !== line[line.length - 1])
@@ -309,7 +354,7 @@ const AccountData = function (accountNumber) {
 };
 
 const BankMap = function (file, onComplete) {
-    this.mapping = null;
+    let mapping = null;
 
     const loadJsonFile = function () {
         const rawFile = new XMLHttpRequest();
@@ -327,22 +372,24 @@ const BankMap = function (file, onComplete) {
     };
 
     const setMapping = (text) => {
-        this.mapping = JSON.parse(text);
+        mapping = JSON.parse(text);
 
         onComplete();
     };
+
+    this.getMapping = () => mapping;
 
     loadJsonFile();
 };
 
 const BankMapper = function (bank) {
     const DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
-    const map = bankMap.mapping[bank];
+    const map = bankMap.getMapping()[bank];
 
     const getLine = function (line, fieldList) {
         let returnLine = "";
 
-        for (let field of fieldList)
+        for (const field of fieldList)
             returnLine += line[field];
 
         return returnLine;
@@ -480,10 +527,10 @@ BankMapper.recognizeBank = function (header) {
     };
 
     // Check the header
-    for (let key in bankMap.mapping) {
-        if (bankMap.mapping.hasOwnProperty(key)) {
-            if (areArraysEqual(header, bankMap.mapping[key].header)) {
-                console.log('Detected bank: ' + key)
+
+    for (let key in bankMap.getMapping()) {
+        if (bankMap.getMapping().hasOwnProperty(key)) {
+            if (areArraysEqual(header, bankMap.getMapping()[key].header)) {
                 return new BankMapper(key);
             }
         }
@@ -493,12 +540,12 @@ BankMapper.recognizeBank = function (header) {
 };
 
 BankMapper.recognizeBankHeaderless = function (fields) {
-    for (let key in bankMap.mapping) {
-        if (bankMap.mapping.hasOwnProperty(key)) {
-            const ibanRegex = RegExp("[A-Z]{2}\\d{2}" + bankMap.mapping[key].bankName + "\\d{10}", "g");
+    for (let key in bankMap.getMapping()) {
+        if (bankMap.getMapping().hasOwnProperty(key)) {
+            const ibanRegex = RegExp("[A-Z]{2}\\d{2}" + bankMap.getMapping()[key].bankName + "\\d{10}", "g");
 
-            const accountColumns = bankMap.mapping[key].account;
-            for (let col of accountColumns) {
+            const accountColumns = bankMap.getMapping()[key].account;
+            for (const col of accountColumns) {
                 if (ibanRegex.test(fields[col]))
                     return new BankMapper(key);
             }
@@ -547,10 +594,9 @@ FileStreamConverter = function () {
                 else // Headerless file
                     bankMapper = BankMapper.recognizeBankHeaderless(results.rows[0].data);
 
-                toastr.info("Bank recognized as " + bankMapper.getBank());
+                // notie.alert({type: "info", text: "Bank recognized as " + bankMapper.getBank(), position: "bottom"});
             } catch (e) {
-                toastr.error("Bank could not be recognized!");
-                console.error(e)
+                notie.alert({type: "error", text: "Bank could not be recognized!", position: "bottom"});
 
                 failedConversion = true;
                 return;
@@ -572,7 +618,7 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
-        toastr.error("An error occurred in file " + file.name + ": " + error);
+        notie.alert({type: "error", text: "An error occurred in file " + file.name + ": " + error, position: "bottom"});
     };
 
     // Completes the conversion and downloads the CSVs
@@ -580,7 +626,8 @@ FileStreamConverter = function () {
         if (failedConversion)
             return;
 
-        toastr.success(result.file.name + " is completed successfully");
+        notie.alert({type: "success", text: result.file.name + " is completed successfully. Converted as " +
+                bankMapper.getBank(), position: "bottom"});
 
         const keys = Object.keys(accounts);
 
