@@ -94,8 +94,8 @@ footer {
     line-height: 30px;
     border-radius: 20px;
     width: 500px;
-    min-height: 150px;
-    margin: 50px auto;
+    height: 200px;
+    margin: 80px auto;
     display: table;
 }
 
