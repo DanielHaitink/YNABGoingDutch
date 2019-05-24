@@ -15,6 +15,7 @@ Currently the banks that are supported are:
  - ING bank
  - ASN bank
  - SNS bank
+ - KNAB
 
  If you want support for your bank, please create a github issue, or contact me some other way.
  You are also welcome to fork the repo and add support yourself! Please create a pull request if you want your code to be added.
