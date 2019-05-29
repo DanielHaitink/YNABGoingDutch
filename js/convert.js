@@ -405,7 +405,7 @@ const YNABConverter = function () {
 
     /**
      * Covert the file stream per chunk given.
-     * @param results
+     * @param results {FileStreamerResultStep} Result of the convertion.
      */
     this.convert = function (results) {
         if (_hasConversionFailed)
