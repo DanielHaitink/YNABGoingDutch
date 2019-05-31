@@ -256,7 +256,23 @@ const BankMapper = function (bank) {
      * @param line {String} A line from a CSV.
      * @return {string} The payee.
      */
-    this.getPayee = (line) => getLine(line, _map.payee);
+    this.getPayee = (line) => {
+        let payee = getLine(line, _map.payee);
+
+        // Fallback method for ASN and SNS
+        if (!payee || payee === "") {
+            const memo = this.getMemo(line);
+
+            if (memo.search("MCC") !== -1) {
+                const splitMemo = memo.split('>');
+
+                if (splitMemo.length > 0)
+                    return splitMemo[0].trim();
+            }
+        }
+
+        return payee;
+    };
 
     /**
      * Get the category of the current line
