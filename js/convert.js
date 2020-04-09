@@ -176,8 +176,13 @@ const BankMapper = function (bank) {
     const getLine = (line, fieldList) => {
         let returnLine = "";
 
-        for (const field of fieldList)
+        for (const field of fieldList){
+            if(returnLine && line[field]){
+                returnLine += " ";
+            }
+        
             returnLine += line[field];
+         }
 
         return returnLine;
     };
