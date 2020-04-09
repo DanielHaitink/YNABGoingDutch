@@ -82,6 +82,7 @@
     ],
     "dateFormat": "YYYY-MM-DD",
     "payee": [
+      "Tegenrekening IBAN/BBAN",
       "Naam tegenpartij"
     ],
     "category": [],
