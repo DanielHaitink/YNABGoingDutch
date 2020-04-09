@@ -28,6 +28,7 @@
     ],
     "dateFormat": "DD-MM-YYYY",
     "payee": [
+      "Tegenrekeningnummer",
       "Tegenrekeninghouder"
     ],
     "category": [],
@@ -122,6 +123,7 @@
     ],
     "dateFormat": "YYYYMMDD",
     "payee": [
+      "Tegenrekening",
       "Naam / Omschrijving"
     ],
     "category": [],
