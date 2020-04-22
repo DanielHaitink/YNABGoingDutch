@@ -28,8 +28,8 @@
     ],
     "dateFormat": "DD-MM-YYYY",
     "payee": [
-      "Tegenrekeningnummer",
-      "Tegenrekeninghouder"
+      "Tegenrekeninghouder",
+      "Tegenrekeningnummer"
     ],
     "category": [],
     "memo": [
