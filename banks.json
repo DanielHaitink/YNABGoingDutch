@@ -83,8 +83,8 @@
     ],
     "dateFormat": "YYYY-MM-DD",
     "payee": [
-      "Tegenrekening IBAN/BBAN",
-      "Naam tegenpartij"
+      "Naam tegenpartij",
+      "Tegenrekening IBAN/BBAN"
     ],
     "category": [],
     "memo": [
