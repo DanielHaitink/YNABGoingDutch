@@ -123,8 +123,8 @@
     ],
     "dateFormat": "YYYYMMDD",
     "payee": [
-      "Tegenrekening",
-      "Naam / Omschrijving"
+      "Naam / Omschrijving",
+      "Tegenrekening"
     ],
     "category": [],
     "memo": [
