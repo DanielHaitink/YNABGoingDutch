@@ -1,4 +1,39 @@
 {
+  "bunq": {
+    "bankName": "bunq",
+    "header": [
+      "Datum",
+      "Rentedatum",
+      "Bedrag",
+      "Rekening",
+      "Tegenrekening",
+      "Naam",
+      "Omschrijving"
+    ],
+    "account": [
+      "Rekening"
+    ],
+    "date": [
+      "Datum"
+    ],
+    "dateFormat": "YYYY-MM-DD",
+    "payee": [
+      "Naam",
+      "Tegenrekening"
+    ],
+    "category": [],
+    "memo": [
+      "Omschrijving"
+    ],
+    "outflow": [
+      "Bedrag"
+    ],
+    "inflow": [
+      "Bedrag"
+    ],
+    "positiveIndicator": null,
+    "negativeIndicator": "-"
+  },
   "KNAB": {
     "bankName": "KNAB",
     "header": [
