@@ -356,7 +356,7 @@ BankMapper.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
 BankMapper.recognizeBank = (header) => {
     const areArraysEqual = (arrayOne, arrayTwo) => {
         for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
-            if (itemOne !== itemTwo)
+            if (itemOne.toLowerCase() !== itemTwo.toLowerCase())
                 return false;
         }
         return true;
@@ -403,6 +403,7 @@ const YNABConverter = function () {
     const _accounts = {}; // All the different account numbers in the file
     let _bankMapper = null; // The bank mapping for the file
     let _hasConversionFailed = false;
+    let _recognizeFallback = false;
 
     // Convert the current CSV line
     const convertLine = (line) => {
@@ -435,14 +436,19 @@ const YNABConverter = function () {
         // Init the BankMapper is none is created yet
         if (!_bankMapper) {
             try {
-                if (results.fields) // Headered file
+                if (results.fields && !_recognizeFallback) // Headered file
                     _bankMapper = BankMapper.recognizeBank(results.fields);
                 else // Headerless file
                     _bankMapper = BankMapper.recognizeBankHeaderless(results.rows[0].data);
 
             } catch (e) {
-                notie.alert({type: "error", text: "Bank could not be recognized!", position: "bottom"});
+                if (results.fields && !_recognizeFallback) {
+                    console.warn("Headered file could not be recognized, trying to use fallback.")
+                    _recognizeFallback = true;
+                    return this.convert(results);
+                }
 
+                notie.alert({type: "error", text: "Bank could not be recognized!", position: "bottom"});
                 _hasConversionFailed = true;
                 return;
             }
