@@ -177,6 +177,48 @@
       "Af Bij"
     ]
   },
+  "ING Bank Bonusrenterekening": {
+    "bankName": "INGB",
+    "header": [
+      "Datum",
+      "Omschrijving",
+      "Rekening",
+      "Rekening type",
+      "Tegenrekening",
+      "Af Bij",
+      "Bedrag",
+      "Valuta",
+      "Mutatiesoort",
+      "Mededelingen",
+      "Saldo na mutatie"
+    ],
+    "account": [
+      "Rekening"
+    ],
+    "date": [
+      "Datum"
+    ],
+    "dateFormat": "YYYY-MM-DD",
+    "payee": [
+      "Tegenrekening"
+    ],
+    "category": [],
+    "memo": [
+      "Mutatiesoort",
+      "Mededelingen"
+    ],
+    "outflow": [
+      "Bedrag"
+    ],
+    "inflow": [
+      "Bedrag"
+    ],
+    "positiveIndicator": "Bij",
+    "negativeIndicator": "Af",
+    "separateIndicator": [
+      "Af Bij"
+    ]
+  },
   "ASN Bank": {
     "bankName": "ASNB",
     "header": null,

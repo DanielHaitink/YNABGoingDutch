@@ -1,0 +1,6 @@
+"Datum","Omschrijving","Rekening","Rekening type","Tegenrekening","Af Bij","Bedrag","Valuta","Mutatiesoort","Mededelingen","Saldo na mutatie"
+"2020-07-10","Overboeking van betaalrekening NL01INGB0123456789","NL01INGB0123456789","Bonusrenterekening","NL01INGB0123456789","Bij","100,00","EUR","Inleg","","-98,00"
+"2020-07-04","Overboeking naar betaalrekening NL01INGB0123456789","NL01INGB0123456789","Bonusrenterekening","NL01INGB0123456789","Af","100,00","EUR","Opname","","-198,00"
+"2020-07-03","Overboeking naar betaalrekening NL01INGB0123456789","NL01INGB0123456789","Bonusrenterekening","NL01INGB0123456789","Af","100,00","EUR","Opname","","-98,00"
+"2020-07-02","Bonusrente","NL01INGB0123456789","Bonusrenterekening","","Bij","1,00","EUR","Rente","Valutadatum: 01-07-2020","2,00"
+"2020-07-01","Basisrente","NL01INGB0123456789","Bonusrenterekening","","Bij","1,00","EUR","Rente","","1,00"
