@@ -34,6 +34,41 @@
     "positiveIndicator": null,
     "negativeIndicator": "-"
   },
+  "bunq-en": {
+    "bankName": "BUNQ-EN",
+    "header": [
+      "Date",
+      "Interest Date",
+      "Amount",
+      "Account",
+      "Counterparty",
+      "Name",
+      "Description"
+    ],
+    "account": [
+      "Account"
+    ],
+    "date": [
+      "Date"
+    ],
+    "dateFormat": "DD/MM/YYYY",
+    "payee": [
+      "Name",
+      "Counterparty"
+    ],
+    "category": [],
+    "memo": [
+      "Description"
+    ],
+    "outflow": [
+      "Amount"
+    ],
+    "inflow": [
+      "Amount"
+    ],
+    "positiveIndicator": null,
+    "negativeIndicator": "-"
+  },
   "KNAB": {
     "bankName": "KNAB",
     "header": [
