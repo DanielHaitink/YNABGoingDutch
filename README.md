@@ -16,7 +16,7 @@ Currently the banks that are supported are:
  - ASN bank
  - SNS bank
  - KNAB
- - bunq (Dutch localization)
+ - bunq (both English and Dutch localization)
  
 For ABN AMRO support, please visit [YNABGoingDutch ABN AMRO edition](https://github.com/danielswrath/YNABGoingDutch-ABN-edition).
 
