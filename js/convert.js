@@ -99,7 +99,7 @@ const YNABAccountData = function (accountNumber) {
         }
 
         const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
-        const fileName = accountNumber + "_" + date + ".csv";
+        const fileName = "ynab_" + accountNumber + "_" + date + ".csv";
         const blob = new Blob([blobText], {
             type: "text/csv;charset=utf-8;"
         });
