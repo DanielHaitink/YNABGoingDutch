@@ -27,7 +27,7 @@
 <div id="content">
     <div id="info">
         This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
-        <br><br>Your CSV will instantly download upon file selection. You can also <a id="toggle-ynab-settings" href="javascript:void(0)">configure this tool to synchronize directly with your online YNAB instance</a>.
+        <br><br>Your CSV will instantly download upon file selection. You can also <a id="toggle-ynab-settings" href="javascript:void(0);">configure this tool to synchronize directly with your online YNAB instance</a>.
 	</div>
 	
 	<div id="ynab-settings">
@@ -38,7 +38,7 @@
 		</div>
 		<div>
 			<span id="pat-input-invalid">Provide a PAT to continue...</span>
-			<span id="pat-input-valid" class="hidden">Ready to link your accounts? <a href="#">Click here to load data from YNAB.</a></span>
+			<span id="pat-input-valid" class="hidden">Ready to link your accounts? <a id="load-ynab-data" href="javascript:void(0);">Click here to load data from YNAB.</a></span>
 			<span id="pat-invalid" class="hidden">Failed to connect to YNAB. Are you sure your PAT is correct?</span>
 		</div>
 		<div id="ynab-connected">
@@ -82,10 +82,13 @@
     </div>
 </footer>
 
-<script src="js/notie/notie.min.js"></script>
-<script src="js/dropArea.js"></script>
-<script src="js/CSVGood.js"></script>
+<script src="js/notie/notie.min.js" async></script>
+<script src="js/dropArea.js" async></script>
+<script src="js/CSVGood.js" async></script>
+<script src="https://unpkg.com/ynab@latest/dist/browser/ynab.js" async></script>
+
 <script src="js/convert.js"></script>
 <script src="js/ynabConnect.ui.js"></script>
+<script src="js/ynabConnect.app.js"></script>
 </body>
 </html>

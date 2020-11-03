@@ -25,4 +25,19 @@
 
 	const ynabConnectedDiv = document.getElementById("ynab-connected");
 	hideElement(ynabConnectedDiv);
+
+	const patInput = document.getElementById("pat");
+	const validatePatInput = function () {
+		invalidInputSpan.style.display = (!patInput.value) ? "inline" : "none";
+		validInputSpan.style.display = (!patInput.value) ? "none" : "inline";
+	}
+	patInput.addEventListener("keyup", validatePatInput);
+	patInput.addEventListener("blur", validatePatInput);
+	patInput.addEventListener("onpaste", validatePatInput);
+
+	const loadYnabDataLink = document.getElementById("load-ynab-data");
+	loadYnabDataLink.addEventListener("click", function () {
+		const ynabConnect = new YNABConnect(patInput.value);
+		ynabConnect.testConnection();
+	});
 })();
