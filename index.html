@@ -1,67 +1,61 @@
 <!DOCTYPE html>
 <html lang="nl">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Converts Dutch bank statements for YNAB">
-	<meta name="author" content="Daniël Haitink">
-	<link rel="icon" href="img/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Converts Dutch bank statements for YNAB">
+    <meta name="author" content="Daniël Haitink">
+    <link rel="icon" href="img/favicon.ico">
 
-	<title>YNAB Going Dutch (Test Change, Please Ignore)</title>
+    <title>YNAB Going Dutch</title>
 
-	<link rel="stylesheet" href="css/YNAB.css">
-	<link rel="stylesheet" href="css/notie.min.css">
+    <link rel="stylesheet" href="css/YNAB.css">
+    <link rel="stylesheet" href="css/notie.min.css">
 
-	<script type="javascript">
+    <script type="javascript">
         if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
             alert("The File APIs are not fully supported in this browser. Please use a different browser");
         }
     </script>
 </head>
-
 <body>
-	<header>
-		<h1>YNAB Going Dutch</h1><br>
-		<h3>Converts your Dutch bank statements from their CSV to YNAB CSV format</h3>
-	</header>
+<header>
+    <h1>YNAB Going Dutch</h1><br>
+    <h3>Converts your Dutch bank statements from their CSV to YNAB CSV format</h3>
+</header>
 
-	<div id="content">
-		<div id="info">
-			This tool is created to automatically convert your CSV bank files to a format that is used by <a
-				href="https://youneedabudget.com">"You Need A Budget"</a>.
-			<br><br>Your CSV will instantly download upon file selection.
-		</div>
+<div id="content">
+    <div id="info">
+        This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
+        <br><br>Your CSV will instantly download upon file selection.
+    </div>
 
-		<div id="drop-area">
-			<input id="drop-input" type="file" multiple onchange="parse()">
-			<div id="drop-text">
-				Drop your files in here!<br>Or click here to select files
-			</div>
-		</div>
+    <div id="drop-area">
+        <input id="drop-input" type="file" multiple onchange="parse()">
+        <div id="drop-text">
+            Drop your files in here!<br>Or click here to select files
+        </div>
+    </div>
 
-		<div id="supported">
-			<h4>Supported Banks</h4>
-			<p>Rabobank - ING - ASN Bank - SNS Bank - KNAB - bunq (both English and Dutch localization)</p>
-			<p>For ABN AMRO support, visit the <a href="https://ynab-abn.danielhaitink.nl">YNABGoingDutch ABN AMRO
-					edition</a></p>
-		</div>
-	</div>
+    <div id="supported">
+        <h4>Supported Banks</h4>
+        <p>Rabobank - ING - ASN Bank - SNS Bank - KNAB - bunq (both English and Dutch localization)</p>
+        <p>For ABN AMRO support, visit the <a href="https://ynab-abn.danielhaitink.nl">YNABGoingDutch ABN AMRO edition</a></p>
+    </div>
+</div>
 
-	<footer>
-		<div class="center">
-			Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a><br>
-			<div class="small">
-				Created by <a href="https://www.danielhaitink.nl">Daniël Haitink</a> <a
-					href="https://lionsdensoftware.nl">Lions Den Software</a>
-			</div>
-		</div>
-	</footer>
+<footer>
+    <div class="center">
+        Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a><br>
+        <div class="small">
+            Created by <a href="https://www.danielhaitink.nl">Daniël Haitink</a> <a href="https://lionsdensoftware.nl">Lions Den Software</a>
+        </div>
+    </div>
+</footer>
 
-	<script src="js/notie/notie.min.js"></script>
-	<script src="js/dropArea.js"></script>
-	<script src="js/CSVGood.js"></script>
-	<script src="js/convert.js"></script>
+<script src="js/notie/notie.min.js"></script>
+<script src="js/dropArea.js"></script>
+<script src="js/CSVGood.js"></script>
+<script src="js/convert.js"></script>
 </body>
-
 </html>
