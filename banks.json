@@ -281,5 +281,20 @@
     "inflow": [10],
     "positiveIndicator": null,
     "negativeIndicator": "-"
+  },
+  "Triodos Bank": {
+    "bankName": "TRIO",
+    "header": null,
+    "account": [1],
+    "date": [0],
+    "dateFormat": "DD-MM-YYYY",
+    "payee": [4, 5],
+    "category": [],
+    "memo": [7],
+    "outflow": [2],
+    "inflow": [2],
+    "positiveIndicator": "Credit",
+    "negativeIndicator": "Debet",
+    "separateIndicator": [3]
   }
 }
