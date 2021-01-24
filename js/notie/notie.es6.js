@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // ====================
 // options
 // ====================
@@ -171,6 +173,13 @@ export const hideAlerts = callback => {
 // exports
 // ====================
 
+/**
+ * 
+ * @param {Object} param0 
+ * @param {1 | 2 | 3 | 4 | 5 | "success" | "warning" | "error" | "info" | "neutral"} param0.type
+ * @param {string} param0.text
+ * @param {"top" | "bottom"} param0.position
+ */
 export const alert = ({
   type = 4,
   text,

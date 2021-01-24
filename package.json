@@ -1,0 +1,16 @@
+{
+  "name": "YNABGoingDutch",
+  "version": "1.0.0",
+  "description": "A converter between the CSV format of Dutch banks and the YNAB format",
+  "main": "js/convert.js",
+  "repository": "https://github.com/DanielsWrath/YNABGoingDutch.git",
+  "author": "Daniël Haitink <danielhaitink@protonmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc --noEmit --pretty"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  }
+}

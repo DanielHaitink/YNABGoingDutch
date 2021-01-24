@@ -25,8 +25,14 @@ new DropArea((files) => {
  */
 export const parse = function () {
     const _input = document.getElementById("drop-input");
+    if (!(_input instanceof HTMLInputElement)) {
+        throw new Error("Expected $drop-input to refer to an input element")
+    }
 
     const parseFiles = () => {
+        if (!_input.files) {
+            throw new Error("Expected input element to hold files")
+        }
         for (const file of _input.files)
             parseFile(file);
 
@@ -132,7 +138,7 @@ YNABAccountData.DATA_DIMENSION = 6;
 
 /**
  * A mapping, which maps the bank CSVs to the YNAB format.
- * @param file {File} The file containing the JSON mapping.
+ * @param file {string} The path to the file containing the JSON mapping.
  * @param onComplete {Function} The function that is called when the mapping is loaded.
  * @constructor
  */
@@ -146,7 +152,7 @@ const BankMap = function (file, onComplete) {
         rawFile.open("GET", file, true);
 
         rawFile.onreadystatechange = function() {
-            if (rawFile.readyState === 4 && rawFile.status == "200") {
+            if (rawFile.readyState === 4 && rawFile.status === 200) {
                 setMapping(rawFile.responseText);
             }
         };
@@ -431,7 +437,9 @@ const YNABConverter = function () {
 
     /**
      * Covert the file stream per chunk given.
-     * @param results {FileStreamerResultStep} Result of the convertion.
+     * @param {Object} results Result of the convertion.
+     * @param {null | string[]} results.fields
+     * @param {{ data: string[], error: null | string }[]} results.rows
      */
     this.convert = function (results) {
         if (_hasConversionFailed)
@@ -482,7 +490,9 @@ const YNABConverter = function () {
 
     /**
      * Completes the conversion and downloads the CSVs.
-     * @param result {FileStreamerResultComplete} The information of the completed stream.
+     * @param {Object} result The information of the completed stream.
+     * @param {null | string[]} result.fields
+     * @param {File} result.file
      */
     this.complete = function (result) {
         if (_hasConversionFailed)

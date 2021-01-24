@@ -5,36 +5,45 @@
  */
 export const DropArea = function(onDrop) {
     const _dropArea = document.getElementById(DropArea.ID);
-
-    const preventDefaults = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const addHighlight = (e) => {
-        _dropArea.classList.add("highlight")
-    };
-
-    const removeHighlight = (e) => {
-        _dropArea.classList.remove("highlight")
-    };
-
-    const handleDrop = (e) => {
-        const dataTransfer = e.dataTransfer;
-
-        onDrop(dataTransfer.files);
-    };
+    if (!_dropArea) {
+        throw new Error("Expected element with ID to exist: " + DropArea.ID);
+    }
 
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(
-        eventName => _dropArea.addEventListener(eventName, preventDefaults, false));
+        eventName => _dropArea.addEventListener(
+            eventName,
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            },
+            false
+        ));
 
     ['dragenter', 'dragover'].forEach(
-        eventName => _dropArea.addEventListener(eventName, addHighlight, false));
+        eventName => _dropArea.addEventListener(
+            eventName,
+            (e) => _dropArea.classList.add("highlight"),
+            false
+        ));
 
     ['dragleave', 'drop'].forEach(
-        eventName => _dropArea.addEventListener(eventName, removeHighlight, false));
+        eventName => _dropArea.addEventListener(
+            eventName,
+            (e) => _dropArea.classList.remove("highlight"),
+            false
+        ));
 
-    _dropArea.addEventListener("drop", handleDrop, false);
+    _dropArea.addEventListener(
+        "drop",
+        (e) => {
+            const dataTransfer = e.dataTransfer;
+            if (!dataTransfer) {
+                throw new Error("Expected event to have a DataTransfer object")
+            }
+            onDrop(dataTransfer.files);
+        },
+        false
+    );
 };
 
 DropArea.ID = "drop-area";

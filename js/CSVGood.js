@@ -196,6 +196,9 @@ export const CSVGood = function (file, onStep, onError, onComplete) {
 
         fileReader.onload = (evt) => {
             // Take result
+            if (!evt.target) {
+                throw new Error("Expected event to have a target")
+            }
             let rows = splitRows(evt.target.result);
 
             // Check rows for not completed
