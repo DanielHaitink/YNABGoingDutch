@@ -1,3 +1,7 @@
+import { DropArea } from "./dropArea.js"
+import { CSVGood } from "./CSVGood.js"
+import notie from "./notie/notie.es6.js"
+
 let bankMap = null;
 
 // Add new drop area for drag and drop behaviour
@@ -19,7 +23,7 @@ new DropArea((files) => {
 /**
  * Parse the files in the input field, selected with the input button.
  */
-const parse = function () {
+export const parse = function () {
     const _input = document.getElementById("drop-input");
 
     const parseFiles = () => {

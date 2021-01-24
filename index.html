@@ -31,7 +31,7 @@
     </div>
 
     <div id="drop-area">
-        <input id="drop-input" type="file" multiple onchange="parse()">
+        <input id="drop-input" type="file" multiple>
         <div id="drop-text">
             Drop your files in here!<br>Or click here to select files
         </div>
@@ -53,9 +53,9 @@
     </div>
 </footer>
 
-<script src="js/notie/notie.min.js"></script>
-<script src="js/dropArea.js"></script>
-<script src="js/CSVGood.js"></script>
-<script src="js/convert.js"></script>
+<script type="module">
+  import { parse } from './js/convert.js';
+  document.getElementById("drop-input").onchange = parse;
+</script>
 </body>
 </html>

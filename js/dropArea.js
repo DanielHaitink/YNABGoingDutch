@@ -3,7 +3,7 @@
  * @param onDrop {Function} A function that is called when files are dropped.
  * @constructor
  */
-const DropArea = function(onDrop) {
+export const DropArea = function(onDrop) {
     const _dropArea = document.getElementById(DropArea.ID);
 
     const preventDefaults = (e) => {

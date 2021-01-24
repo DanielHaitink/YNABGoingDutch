@@ -6,7 +6,7 @@
  * @param onComplete {Function} The function that will be called when the file stream has been finished.
  * @constructor
  */
-const CSVGood = function (file, onStep, onError, onComplete) {
+export const CSVGood = function (file, onStep, onError, onComplete) {
     let _header = null;
     let _numberOfCols = 0;
     let _firstLineParsed = false;
