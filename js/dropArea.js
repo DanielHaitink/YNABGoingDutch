@@ -1,6 +1,6 @@
 /**
  * DropArea handles file drops in the drop-area element.
- * @param onDrop {Function} A function that is called when files are dropped.
+ * @param onDrop {(files: FileList) => void} A function that is called when files are dropped.
  * @constructor
  */
 export const DropArea = function(onDrop) {

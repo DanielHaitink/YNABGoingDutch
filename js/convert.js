@@ -1,72 +1,48 @@
-import { DropArea } from "./dropArea.js"
-import { CSVGood } from "./CSVGood.js"
-import notie from "./notie/notie.es6.js"
-
-let bankMap = null;
-
-// Add new drop area for drag and drop behaviour
-new DropArea((files) => {
-
-    const parseFiles = () => {
-        for (const file of files)
-            parseFile(file);
-    };
-
-    if (bankMap === null) {
-        bankMap = new BankMap("banks.json", () => parseFiles());
-    }
-    else {
-        parseFiles();
-    }
-});
+import { CSVGood } from "./CSVGood.js";
 
 /**
- * Parse the files in the input field, selected with the input button.
+ * @typedef {Object} BankMap
+ * @property {string} bankName
+ * @property {string[]} header
+ * @property {string[]} account
+ * @property {string[]} date
+ * @property {string} dateFormat
+ * @property {string[]} payee
+ * @property {string[]} category
+ * @property {string[]} memo
+ * @property {string[]} outflow
+ * @property {string[]} inflow
+ * @property {string} positiveIndicator
+ * @property {string} negativeIndicator
+ * @property {string[]} separateIndicator
  */
-export const parse = function () {
-    const _input = document.getElementById("drop-input");
-    if (!(_input instanceof HTMLInputElement)) {
-        throw new Error("Expected $drop-input to refer to an input element")
-    }
 
-    const parseFiles = () => {
-        if (!_input.files) {
-            throw new Error("Expected input element to hold files")
-        }
-        for (const file of _input.files)
-            parseFile(file);
-
-        _input.value = "";
-    };
-
-    // Load JSON before parsing files
-    if (bankMap === null) {
-        bankMap = new BankMap("banks.json", () => parseFiles());
-    }
-    else {
-        parseFiles();
-    }
-};
+/**
+ * @type {Record<string, BankMap> | null}
+ */
+let _bankMappings = null;
 
 // Parse every file as a stream
 /**
  * Parse a file as a stream.
  * @param file {File} A file that should be converted.
+ * @param handleError {YNABConverterCompletionHandler}
  */
-const parseFile = function (file) {
-    const _converter = new YNABConverter();
+export const parseFile = function (file, handleError) {
+  const _converter = new YNABConverter(handleError);
 
-    new CSVGood(file,
-        (result) => {
-            _converter.convert(result);
-        },
-        (error) => {
-            _converter.handleError(error, file);
-        },
-        (result) => {
-            _converter.complete(result);
-        }
-    );
+  new CSVGood(
+    file,
+    (result) => {
+      _converter.convert(result);
+    },
+    (error) => {
+      _converter.handleError(error);
+    },
+    (result) => {
+      _converter.complete(result);
+    }
+  );
 };
 
 /**
@@ -75,288 +51,229 @@ const parseFile = function (file) {
  * @constructor
  */
 const YNABAccountData = function (accountNumber) {
-    let _csvData = [
-        ["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"]
-    ];
+  let _csvData = [["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"]];
 
-    /**
-     * Add a line to the CSV.
-     * @param data {Array} An array of strings.
-     */
-    this.addLine = (data) => {
-        if (YNABAccountData.DATA_DIMENSION !== data.length) {
-            console.error("Data is of the wrong size!");
-            return;
-        }
+  /**
+   * Add a line to the CSV.
+   * @param data {Array} An array of strings.
+   */
+  this.addLine = (data) => {
+    if (YNABAccountData.DATA_DIMENSION !== data.length) {
+      console.error("Data is of the wrong size!");
+      return;
+    }
 
-        _csvData.push(data);
-    };
+    _csvData.push(data);
+  };
 
-    /**
-     * Prompt a download for the new CSV file.
-     */
-    this.downloadCSV = () => {
-        let blobText = "";
+  this.toString = () => {
+    let blobText = "";
+    for (const line of _csvData) {
+      for (const item of line) {
+        blobText += '"' + item + '"';
 
-        for (const line of _csvData) {
-            for (const item of line) {
-                blobText += "\"" + item + "\"";
+        if (item !== line[line.length - 1]) blobText += ",";
+      }
+      blobText += "\r\n";
+    }
+    return blobText;
+  }
 
-                if (item !== line[line.length - 1])
-                    blobText += ",";
-            }
-            blobText += "\r\n";
-        }
-
-        const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
-        const fileName = "ynab_" + accountNumber + "_" + date + ".csv";
-        const blob = new Blob([blobText], {
-            type: "text/csv;charset=utf-8;"
-        });
-
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, fileName);
-        } else {
-            const link = document.createElement("a");
-
-            if (link.download !== undefined) {
-                let url = URL.createObjectURL(blob);
-
-                link.setAttribute("href", url);
-                link.setAttribute("download", fileName);
-                link.style.visibility = "hidden";
-
-                document.body.appendChild(link);
-
-                link.click();
-            }
-        }
-    };
+  this.getSuggestedFilename = () => {
+    const date = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
+    const fileName = "ynab_" + accountNumber + "_" + date + ".csv";
+    return fileName
+  }
 };
 
 YNABAccountData.DATA_DIMENSION = 6;
-
-/**
- * A mapping, which maps the bank CSVs to the YNAB format.
- * @param file {string} The path to the file containing the JSON mapping.
- * @param onComplete {Function} The function that is called when the mapping is loaded.
- * @constructor
- */
-const BankMap = function (file, onComplete) {
-    let _mapping = null;
-
-    const loadJsonFile = () => {
-        const rawFile = new XMLHttpRequest();
-
-        rawFile.overrideMimeType("application/json");
-        rawFile.open("GET", file, true);
-
-        rawFile.onreadystatechange = function() {
-            if (rawFile.readyState === 4 && rawFile.status === 200) {
-                setMapping(rawFile.responseText);
-            }
-        };
-
-        rawFile.send(null);
-    };
-
-    const setMapping = (text) => {
-        _mapping = JSON.parse(text);
-
-        onComplete();
-    };
-
-    /**
-     * Get the bank mapping.
-     * @return {JSON} The bank mapping JSON.
-     */
-    this.getMapping = () => _mapping;
-
-    loadJsonFile();
-};
 
 /**
  *
  * @param bank
  * @constructor
  */
-const BankMapper = function (bank) {
-    const _map = bankMap.getMapping()[bank];
+export const BankMapper = function (bank) {
+  const _map = BankMapper.getMappings()[bank];
 
-    const getLine = (line, fieldList) => {
-        let returnLine = "";
+  const getLine = (line, fieldList) => {
+    let returnLine = "";
 
-        for (const field of fieldList) {
-            const fieldValue = line[field].trim();
-            if (!!returnLine.trim() && !!fieldValue)
-                returnLine += " ";
-        
-            returnLine += fieldValue;
-         }
+    for (const field of fieldList) {
+      const fieldValue = line[field].trim();
+      if (!!returnLine.trim() && !!fieldValue) returnLine += " ";
 
-        return returnLine;
-    };
+      returnLine += fieldValue;
+    }
 
-    // Check whether the indicator is positive
-    const isIndicatorPositive = function (indicatorField) {
-        if (!_map.positiveIndicator) {
-            if (!_map.negativeIndicator)
-                throw "NoIndicatorsError";
-            // Check for negative indicator
-            return !isIndicatorNegative(indicatorField);
-        }
+    return returnLine;
+  };
 
-        return indicatorField.includes(_map.positiveIndicator);
-    };
+  // Check whether the indicator is positive
+  const isIndicatorPositive = function (indicatorField) {
+    if (!_map.positiveIndicator) {
+      if (!_map.negativeIndicator) throw "NoIndicatorsError";
+      // Check for negative indicator
+      return !isIndicatorNegative(indicatorField);
+    }
 
-    // Check whether the indicator is negative
-    const isIndicatorNegative = function (indicatorField) {
-        if (!_map.negativeIndicator) {
-            if (!_map.positiveIndicator)
-                throw "NoIndicatorsError";
-            return !isIndicatorPositive(indicatorField);
-        }
+    return indicatorField.includes(_map.positiveIndicator);
+  };
 
-        return indicatorField.includes(_map.negativeIndicator);
-    };
+  // Check whether the indicator is negative
+  const isIndicatorNegative = function (indicatorField) {
+    if (!_map.negativeIndicator) {
+      if (!_map.positiveIndicator) throw "NoIndicatorsError";
+      return !isIndicatorPositive(indicatorField);
+    }
 
-    /**
-     * Get the bank type of this BankMapper.
-     * @return {String} The key of the bank.
-     */
-    this.getBank = () => bank;
+    return indicatorField.includes(_map.negativeIndicator);
+  };
 
-    /**
-     * Get the account number of the current line.
-     * @param line {String} A line from a CSV.
-     * @return {string} The account number.
-     */
-    this.getAccount = (line) => getLine(line, _map.account);
+  /**
+   * Get the bank type of this BankMapper.
+   * @return {String} The key of the bank.
+   */
+  this.getBank = () => bank;
 
-    /**
-     * Return the date in the european format of the current line(DD-MM-YYYY)
-     * @param line {String} A line from a CSV.
-     * @return {string} The date.
-     */
-    this.getDate = (line) => {
-        const dateField = _map.date;
-        const text = getLine(line, dateField);
-        const dateFormat = _map.dateFormat;
+  /**
+   * Get the account number of the current line.
+   * @param line {String} A line from a CSV.
+   * @return {string} The account number.
+   */
+  this.getAccount = (line) => getLine(line, _map.account);
 
-        if (dateFormat === BankMapper.DEFAULT_DATE_FORMAT)
-            return text;
+  /**
+   * Return the date in the european format of the current line(DD-MM-YYYY)
+   * @param line {String} A line from a CSV.
+   * @return {string} The date.
+   */
+  this.getDate = (line) => {
+    const dateField = _map.date;
+    const text = getLine(line, dateField);
+    const dateFormat = _map.dateFormat;
 
-        let year = "";
-        let month = "";
-        let day = "";
-        for (let index = 0; index < dateFormat.length; ++index) {
-            switch (dateFormat.charAt(index)) {
-                case "Y":
-                    year += text.charAt(index);
-                    break;
-                case "M":
-                    month += text.charAt(index);
-                    break;
-                case "D":
-                    day += text.charAt(index);
-                    break;
-            }
-        }
+    if (dateFormat === BankMapper.DEFAULT_DATE_FORMAT) return text;
 
-        return day + "-" + month + "-" + year;
-    };
+    let year = "";
+    let month = "";
+    let day = "";
+    for (let index = 0; index < dateFormat.length; ++index) {
+      switch (dateFormat.charAt(index)) {
+        case "Y":
+          year += text.charAt(index);
+          break;
+        case "M":
+          month += text.charAt(index);
+          break;
+        case "D":
+          day += text.charAt(index);
+          break;
+      }
+    }
 
-    /**
-     * Get the payee of the current line
-     * @param line {String} A line from a CSV.
-     * @return {string} The payee.
-     */
-    this.getPayee = (line) => {
-        let payee = getLine(line, _map.payee);
+    return day + "-" + month + "-" + year;
+  };
 
-        // Fallback method for ASN and SNS
-        if (!payee || payee === "") {
-            const memo = this.getMemo(line);
+  /**
+   * Get the payee of the current line
+   * @param line {String} A line from a CSV.
+   * @return {string} The payee.
+   */
+  this.getPayee = (line) => {
+    let payee = getLine(line, _map.payee);
 
-            if (memo.search("MCC") !== -1) {
-                const splitMemo = memo.split('>');
+    // Fallback method for ASN and SNS
+    if (!payee || payee === "") {
+      const memo = this.getMemo(line);
 
-                if (splitMemo.length > 0)
-                    return splitMemo[0].trim();
-            }
-        }
+      if (memo.search("MCC") !== -1) {
+        const splitMemo = memo.split(">");
 
-        return payee;
-    };
+        if (splitMemo.length > 0) return splitMemo[0].trim();
+      }
+    }
 
-    /**
-     * Get the category of the current line
-     * @param line {String} A line from a CSV.
-     * @return {string} The category.
-     */
-    this.getCategory = (line) => getLine(line, _map.category);
+    return payee;
+  };
 
-    /**
-     * Get the memo of the current line
-     * @param line {String} A line from a CSV.
-     * @return {string} The Memo.
-     */
-    this.getMemo = (line) => getLine(line, _map.memo);
+  /**
+   * Get the category of the current line
+   * @param line {String} A line from a CSV.
+   * @return {string} The category.
+   */
+  this.getCategory = (line) => getLine(line, _map.category);
 
-    /**
-     * Get the inflow of the current line
-     * @param line {String} A line from a CSV.
-     * @return {string} The inflow.
-     */
-    this.getInflow = (line) => {
-        let value = getLine(line, _map.inflow);
-        let indicator = value;
+  /**
+   * Get the memo of the current line
+   * @param line {String} A line from a CSV.
+   * @return {string} The Memo.
+   */
+  this.getMemo = (line) => getLine(line, _map.memo);
 
-        if (_map.separateIndicator)
-            indicator = getLine(line, _map.separateIndicator);
+  /**
+   * Get the inflow of the current line
+   * @param line {String} A line from a CSV.
+   * @return {string} The inflow.
+   */
+  this.getInflow = (line) => {
+    let value = getLine(line, _map.inflow);
+    let indicator = value;
 
-        if (isIndicatorPositive(indicator)) {
-            if (!_map.separateIndicator && _map.positiveIndicator)
-                value = value.replace(_map.positiveIndicator, "");
+    if (_map.separateIndicator)
+      indicator = getLine(line, _map.separateIndicator);
 
-            if (value.startsWith("+"))
-                value = value.replace("+", "");
+    if (isIndicatorPositive(indicator)) {
+      if (!_map.separateIndicator && _map.positiveIndicator)
+        value = value.replace(_map.positiveIndicator, "");
 
-            value = value.replace(",", ".");
-            return value;
-        }
+      if (value.startsWith("+")) value = value.replace("+", "");
 
-        return "0";
-    };
+      value = value.replace(",", ".");
+      return value;
+    }
 
-    /**
-     * Get the outflow of the current line
-     * @param line {String} A line from a CSV.
-     * @return {string} The outflow.
-     */
-    this.getOutflow = (line) => {
-        let value = getLine(line, _map.outflow);
-        let indicator = value;
+    return "0";
+  };
 
-        if (_map.separateIndicator)
-            indicator = getLine(line, _map.separateIndicator);
+  /**
+   * Get the outflow of the current line
+   * @param line {String} A line from a CSV.
+   * @return {string} The outflow.
+   */
+  this.getOutflow = (line) => {
+    let value = getLine(line, _map.outflow);
+    let indicator = value;
 
-        if (isIndicatorNegative(indicator)) {
-            if (!_map.separateIndicator && _map.negativeIndicator)
-                value = value.replace(_map.negativeIndicator, "");
+    if (_map.separateIndicator)
+      indicator = getLine(line, _map.separateIndicator);
 
-            if (value.startsWith("-"))
-                value = value.replace("-", "");
+    if (isIndicatorNegative(indicator)) {
+      if (!_map.separateIndicator && _map.negativeIndicator)
+        value = value.replace(_map.negativeIndicator, "");
 
-            value = value.replace(",", ".");
-            return value;
-        }
+      if (value.startsWith("-")) value = value.replace("-", "");
 
-        return "0";
-    };
+      value = value.replace(",", ".");
+      return value;
+    }
+
+    return "0";
+  };
 };
 
 BankMapper.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
+
+export const setMappings = (bankMappings) => {
+  _bankMappings = bankMappings;
+};
+
+BankMapper.getMappings = () => {
+  if (_bankMappings === null) {
+    throw new Error("Expected bank mappings to have been set first");
+  }
+  return _bankMappings;
+};
 
 /**
  * Recognize the bank based on the header.
@@ -364,24 +281,27 @@ BankMapper.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
  * @return {BankMapper} A BankMapper for the recognized bank.
  */
 BankMapper.recognizeBank = (header) => {
-    const areArraysEqual = (arrayOne, arrayTwo) => {
-        for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
-            if (itemOne.toLowerCase() !== itemTwo.toLowerCase())
-                return false;
-        }
-        return true;
-    };
-
-    // Check the header
-    for (const key in bankMap.getMapping()) {
-        if (bankMap.getMapping().hasOwnProperty(key)) {
-            if (areArraysEqual(header, bankMap.getMapping()[key].header)) {
-                return new BankMapper(key);
-            }
-        }
+  const areArraysEqual = (arrayOne, arrayTwo) => {
+    for (
+      let index = 0, itemOne, itemTwo;
+      (itemOne = arrayOne[index]), (itemTwo = arrayTwo[index]);
+      ++index
+    ) {
+      if (itemOne.toLowerCase() !== itemTwo.toLowerCase()) return false;
     }
+    return true;
+  };
 
-    throw "CouldNotBeRecognized";
+  // Check the header
+  for (const key in BankMapper.getMappings()) {
+    if (BankMapper.getMappings().hasOwnProperty(key)) {
+      if (areArraysEqual(header, BankMapper.getMappings()[key].header)) {
+        return new BankMapper(key);
+      }
+    }
+  }
+
+  throw "CouldNotBeRecognized";
 };
 
 /**
@@ -390,121 +310,140 @@ BankMapper.recognizeBank = (header) => {
  * @return {BankMapper} A BankMapper for the recognized bank.
  */
 BankMapper.recognizeBankHeaderless = (fields) => {
-    for (const key in bankMap.getMapping()) {
-        if (bankMap.getMapping().hasOwnProperty(key)) {
-            const ibanRegex = RegExp("[A-Z]{2}\\d{2}" + bankMap.getMapping()[key].bankName + "\\d{10}", "g");
-            const accountColumns = bankMap.getMapping()[key].account;
+  for (const key in BankMapper.getMappings()) {
+    if (BankMapper.getMappings().hasOwnProperty(key)) {
+      const ibanRegex = RegExp(
+        "[A-Z]{2}\\d{2}" + BankMapper.getMappings()[key].bankName + "\\d{10}",
+        "g"
+      );
+      const accountColumns = BankMapper.getMappings()[key].account;
 
-            for (const col of accountColumns) {
-                if (ibanRegex.test(fields[col]))
-                    return new BankMapper(key);
-            }
-        }
+      for (const col of accountColumns) {
+        if (ibanRegex.test(fields[col])) return new BankMapper(key);
+      }
     }
+  }
 
-    throw "CouldNotBeRecognized";
+  throw "CouldNotBeRecognized";
 };
 
 /**
- * Converts a streamed CSV file to the desired format
- * @constructor
+ * @typedef {Object} YNABAccountData
+ * @property {string} csvData
+ * @property {string} suggestedFilename
  */
-const YNABConverter = function () {
-    const _accounts = {}; // All the different account numbers in the file
-    let _bankMapper = null; // The bank mapping for the file
-    let _hasConversionFailed = false;
-    let _recognizeFallback = false;
 
-    // Convert the current CSV line
-    const convertLine = (line) => {
-        const account = _bankMapper.getAccount(line);
+/**
+ * @callback YNABConverterCompletionHandler Handle occurred errors.
+ * @param error {string | null} Error message.
+ * @param success {{ bankName: string, accounts: YNABAccountData[]} | null} The success result data.
+ * @returns {void}
+ */
 
-        // If account has not been seen before, create new account
-        if (_accounts[account] == null)
-            _accounts[account] = new YNABAccountData(account);
+/**
+ * Converts a streamed CSV file to the desired format
+ * @param handleCompletion {YNABConverterCompletionHandler}
+ */
+const YNABConverter = function (handleCompletion) {
+  const _handleCompletion = handleCompletion;
+  const _accounts = {}; // All the different account numbers in the file
+  let _bankMapper = null; // The bank mapping for the file
+  let _hasConversionFailed = false;
+  let _recognizeFallback = false;
 
-        const dataRow = [
-            _bankMapper.getDate(line),
-            _bankMapper.getPayee(line),
-            _bankMapper.getCategory(line),
-            _bankMapper.getMemo(line),
-            _bankMapper.getOutflow(line),
-            _bankMapper.getInflow(line)
-        ];
+  // Convert the current CSV line
+  const convertLine = (line) => {
+    const account = _bankMapper.getAccount(line);
 
-        _accounts[account].addLine(dataRow);
-    };
+    // If account has not been seen before, create new account
+    if (_accounts[account] == null)
+      _accounts[account] = new YNABAccountData(account);
 
-    /**
-     * Covert the file stream per chunk given.
-     * @param {Object} results Result of the convertion.
-     * @param {null | string[]} results.fields
-     * @param {{ data: string[], error: null | string }[]} results.rows
-     */
-    this.convert = function (results) {
-        if (_hasConversionFailed)
-            return;
+    const dataRow = [
+      _bankMapper.getDate(line),
+      _bankMapper.getPayee(line),
+      _bankMapper.getCategory(line),
+      _bankMapper.getMemo(line),
+      _bankMapper.getOutflow(line),
+      _bankMapper.getInflow(line),
+    ];
 
-        // Init the BankMapper is none is created yet
-        if (!_bankMapper) {
-            try {
-                if (results.fields && !_recognizeFallback) // Headered file
-                    _bankMapper = BankMapper.recognizeBank(results.fields);
-                else // Headerless file
-                    _bankMapper = BankMapper.recognizeBankHeaderless(results.rows[0].data);
+    _accounts[account].addLine(dataRow);
+  };
 
-            } catch (e) {
-                if (results.fields && !_recognizeFallback) {
-                    console.warn("Headered file could not be recognized, trying to use fallback.")
-                    _recognizeFallback = true;
-                    return this.convert(results);
-                }
+  /**
+   * Covert the file stream per chunk given.
+   * @param {Object} results Result of the convertion.
+   * @param {null | string[]} results.fields
+   * @param {{ data: string[], error: null | string }[]} results.rows
+   */
+  this.convert = function (results) {
+    if (_hasConversionFailed) return;
 
-                notie.alert({type: "error", text: "Bank could not be recognized!", position: "bottom"});
-                _hasConversionFailed = true;
-                return;
-            }
+    // Init the BankMapper is none is created yet
+    if (!_bankMapper) {
+      try {
+        if (results.fields && !_recognizeFallback)
+          // Headered file
+          _bankMapper = BankMapper.recognizeBank(results.fields);
+        // Headerless file
+        else
+          _bankMapper = BankMapper.recognizeBankHeaderless(
+            results.rows[0].data
+          );
+      } catch (e) {
+        if (results.fields && !_recognizeFallback) {
+          console.warn(
+            "Headered file could not be recognized, trying to use fallback."
+          );
+          _recognizeFallback = true;
+          return this.convert(results);
         }
 
-        // Loop through all the data
-        for (let index = 0, line; line = results.rows[index]; ++index) {
-            // check for error
-            if (line.error !== null)
-                continue;
+        this.handleError("Bank could not be recognized!")
+        _hasConversionFailed = true;
+        return;
+      }
+    }
 
-            convertLine(line.data);
-        }
-    };
+    // Loop through all the data
+    for (let index = 0, line; (line = results.rows[index]); ++index) {
+      // check for error
+      if (line.error !== null) continue;
 
-    /**
-     * Handle occurred errors.
-     * @param error {string} Error message.
-     * @param file {File} The file in which the error occurred.
-     */
-    this.handleError = function (error, file) {
-        if (_hasConversionFailed)
-            return;
+      convertLine(line.data);
+    }
+  };
 
-        notie.alert({type: "error", text: "An error occurred in file " + file.name + ": " + error, position: "bottom"});
-    };
+  /**
+   * Handle occurred errors.
+   * @param error {string} Error message.
+   */
+  this.handleError = function (error) {
+    if (_hasConversionFailed) return;
+    _handleCompletion(error, null);
+  };
 
-    /**
-     * Completes the conversion and downloads the CSVs.
-     * @param {Object} result The information of the completed stream.
-     * @param {null | string[]} result.fields
-     * @param {File} result.file
-     */
-    this.complete = function (result) {
-        if (_hasConversionFailed)
-            return;
+  /**
+   * Completes the conversion and downloads the CSVs.
+   * @param {Object} result The information of the completed stream.
+   * @param {null | string[]} result.fields
+   * @param {File} result.file
+   */
+  this.complete = function (result) {
+    if (_hasConversionFailed) return;
 
-        notie.alert({type: "success", text: result.file.name + " is completed successfully. Converted as " +
-                _bankMapper.getBank(), position: "bottom"});
+    /** @type {YNABAccountData[]} */
+    const accountsData = [];
 
-        const keys = Object.keys(_accounts);
+    const keys = Object.keys(_accounts);
+    for (let index = 0, account; (account = _accounts[keys[index]]); ++index) {
+      accountsData.push({ csvData: account.toString(), suggestedFilename: account.getSuggestedFilename() })
+    }
 
-        for (let index = 0, account; account = _accounts[keys[index]]; ++index) {
-            account.downloadCSV();
-        }
-    };
+    _handleCompletion(null, {
+      bankName: _bankMapper.getBank(),
+      accounts: accountsData
+    })
+  };
 };
