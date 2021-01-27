@@ -1,16 +1,12 @@
 /**
  * DropArea handles file drops in the drop-area element.
+ * @param element {HTMLElement}
  * @param onDrop {(files: FileList) => void} A function that is called when files are dropped.
  * @constructor
  */
-export const DropArea = function(onDrop) {
-    const _dropArea = document.getElementById(DropArea.ID);
-    if (!_dropArea) {
-        throw new Error("Expected element with ID to exist: " + DropArea.ID);
-    }
-
+export const DropArea = function(element, onDrop) {
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(
-        eventName => _dropArea.addEventListener(
+        eventName => element.addEventListener(
             eventName,
             (e) => {
                 e.preventDefault();
@@ -20,20 +16,20 @@ export const DropArea = function(onDrop) {
         ));
 
     ['dragenter', 'dragover'].forEach(
-        eventName => _dropArea.addEventListener(
+        eventName => element.addEventListener(
             eventName,
-            (e) => _dropArea.classList.add("highlight"),
+            (e) => element.classList.add("highlight"),
             false
         ));
 
     ['dragleave', 'drop'].forEach(
-        eventName => _dropArea.addEventListener(
+        eventName => element.addEventListener(
             eventName,
-            (e) => _dropArea.classList.remove("highlight"),
+            (e) => element.classList.remove("highlight"),
             false
         ));
 
-    _dropArea.addEventListener(
+    element.addEventListener(
         "drop",
         (e) => {
             const dataTransfer = e.dataTransfer;
@@ -45,5 +41,3 @@ export const DropArea = function(onDrop) {
         false
     );
 };
-
-DropArea.ID = "drop-area";

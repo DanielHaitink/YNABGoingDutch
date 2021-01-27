@@ -62,24 +62,6 @@ function handleFiles(files) {
   }
 }
 
-// Add new drop area for drag and drop behaviour
-new DropArea(handleFiles);
-
-/**
- * Parse the files in the input field, selected with the input button.
- */
-export const parse = function () {
-  const _input = document.getElementById("drop-input");
-  if (!(_input instanceof HTMLInputElement)) {
-    throw new Error("Expected $drop-input to refer to an input element");
-  }
-  if (!_input.files) {
-    throw new Error("Expected input element to hold files");
-  }
-  handleFiles(_input.files)
-  _input.value = "";
-};
-
 /**
  * A mapping, which maps the bank CSVs to the YNAB format.
  * @param file {string} The path to the file containing the JSON mapping.
@@ -105,3 +87,18 @@ const BankMap = function (file, onComplete) {
 
   loadJsonFile();
 };
+
+/**
+ * @param {HTMLInputElement} input
+ * @param {HTMLElement} dropArea
+ */
+export function init(input, dropArea) {
+  input.onchange = () => {
+    if (!input.files) {
+      throw new Error("Expected input element to hold files");
+    }
+    handleFiles(input.files)
+    input.value = "";
+  }
+  new DropArea(dropArea, handleFiles)
+}
