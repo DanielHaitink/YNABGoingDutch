@@ -1,6 +1,6 @@
 import { DropArea } from "./dropArea.js";
 import notie from "./notie/notie.es6.js";
-import { setMappings, parseFile } from "./convert.js";
+import { BankMapper, YNABConverter } from "./convert.js";
 
 let bankMap = null;
 
@@ -10,7 +10,7 @@ let bankMap = null;
 function handleFiles(files) {
   const parseFiles = () => {
     for (const file of files) {
-      parseFile(file, (error, result) => {
+      YNABConverter.convert(file, (error, result) => {
         if (error) {
           notie.alert({
             type: "error",
@@ -26,30 +26,31 @@ function handleFiles(files) {
               result.bankName,
             position: "bottom",
           });
-          result.accounts.forEach(account => {
-            const blob = new Blob([account.csvData], {
+          Object.keys(result.accounts).forEach((accountKey) => {
+            const account = result.accounts[accountKey];
+            const blob = new Blob([account.toString()], {
               type: "text/csv;charset=utf-8;",
             });
-        
+
             if (navigator.msSaveBlob) {
               // IE 10+
-              navigator.msSaveBlob(blob, account.suggestedFilename);
+              navigator.msSaveBlob(blob, account.getSuggestedFilename());
             } else {
               const link = document.createElement("a");
-        
+
               if (link.download !== undefined) {
                 let url = URL.createObjectURL(blob);
-        
+
                 link.setAttribute("href", url);
-                link.setAttribute("download", account.suggestedFilename);
+                link.setAttribute("download", account.getSuggestedFilename());
                 link.style.visibility = "hidden";
-        
+
                 document.body.appendChild(link);
-        
+
                 link.click();
               }
             }
-          })
+          });
         }
       });
     }
@@ -77,7 +78,7 @@ const BankMap = function (file, onComplete) {
 
     rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4 && rawFile.status === 200) {
-        setMappings(JSON.parse(rawFile.responseText));
+        BankMapper.setMappings(JSON.parse(rawFile.responseText));
         onComplete();
       }
     };
@@ -97,8 +98,8 @@ export function init(input, dropArea) {
     if (!input.files) {
       throw new Error("Expected input element to hold files");
     }
-    handleFiles(input.files)
+    handleFiles(input.files);
     input.value = "";
-  }
-  new DropArea(dropArea, handleFiles)
+  };
+  new DropArea(dropArea, handleFiles);
 }

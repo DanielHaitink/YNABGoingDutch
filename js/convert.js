@@ -18,44 +18,23 @@ import { CSVGood } from "./CSVGood.js";
  */
 
 /**
- * @type {Record<string, BankMap> | null}
+ * @typedef {Object} YNABAccountData
+ * @property {(data: string[]) => void} addLine
+ * @property {() => string} toString
+ * @property {() => string} getSuggestedFilename
  */
-let _bankMappings = null;
-
-// Parse every file as a stream
-/**
- * Parse a file as a stream.
- * @param file {File} A file that should be converted.
- * @param handleError {YNABConverterCompletionHandler}
- */
-export const parseFile = function (file, handleError) {
-  const _converter = new YNABConverter(handleError);
-
-  new CSVGood(
-    file,
-    (result) => {
-      _converter.convert(result);
-    },
-    (error) => {
-      _converter.handleError(error);
-    },
-    (result) => {
-      _converter.complete(result);
-    }
-  );
-};
 
 /**
  * Holds data of the eventual CSV file, in YNAB format.
  * @param accountNumber {String} The unique number of the bank account.
  * @constructor
  */
-const YNABAccountData = function (accountNumber) {
+export const YNABAccountData = function (accountNumber) {
   let _csvData = [["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"]];
 
   /**
    * Add a line to the CSV.
-   * @param data {Array} An array of strings.
+   * @param data {string[]} An array of strings.
    */
   this.addLine = (data) => {
     if (YNABAccountData.DATA_DIMENSION !== data.length) {
@@ -77,13 +56,13 @@ const YNABAccountData = function (accountNumber) {
       blobText += "\r\n";
     }
     return blobText;
-  }
+  };
 
   this.getSuggestedFilename = () => {
     const date = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
     const fileName = "ynab_" + accountNumber + "_" + date + ".csv";
-    return fileName
-  }
+    return fileName;
+  };
 };
 
 YNABAccountData.DATA_DIMENSION = 6;
@@ -264,15 +243,20 @@ export const BankMapper = function (bank) {
 
 BankMapper.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
 
-export const setMappings = (bankMappings) => {
-  _bankMappings = bankMappings;
+/**
+ * @type {Record<string, BankMap> | null}
+ */
+BankMapper._bankMappings = null;
+
+BankMapper.setMappings = (bankMappings) => {
+  BankMapper._bankMappings = bankMappings;
 };
 
 BankMapper.getMappings = () => {
-  if (_bankMappings === null) {
+  if (BankMapper._bankMappings === null) {
     throw new Error("Expected bank mappings to have been set first");
   }
-  return _bankMappings;
+  return BankMapper._bankMappings;
 };
 
 /**
@@ -328,15 +312,9 @@ BankMapper.recognizeBankHeaderless = (fields) => {
 };
 
 /**
- * @typedef {Object} YNABAccountData
- * @property {string} csvData
- * @property {string} suggestedFilename
- */
-
-/**
  * @callback YNABConverterCompletionHandler Handle occurred errors.
  * @param error {string | null} Error message.
- * @param success {{ bankName: string, accounts: YNABAccountData[]} | null} The success result data.
+ * @param success {{ bankName: string, accounts: Record<string, YNABAccountData>} | null} The success result data.
  * @returns {void}
  */
 
@@ -344,8 +322,9 @@ BankMapper.recognizeBankHeaderless = (fields) => {
  * Converts a streamed CSV file to the desired format
  * @param handleCompletion {YNABConverterCompletionHandler}
  */
-const YNABConverter = function (handleCompletion) {
+export const YNABConverter = function (handleCompletion) {
   const _handleCompletion = handleCompletion;
+  /** @type {Record<string, YNABAccountData>} */
   const _accounts = {}; // All the different account numbers in the file
   let _bankMapper = null; // The bank mapping for the file
   let _hasConversionFailed = false;
@@ -400,7 +379,7 @@ const YNABConverter = function (handleCompletion) {
           return this.convert(results);
         }
 
-        this.handleError("Bank could not be recognized!")
+        this.handleError("Bank could not be recognized!");
         _hasConversionFailed = true;
         return;
       }
@@ -425,25 +404,35 @@ const YNABConverter = function (handleCompletion) {
   };
 
   /**
-   * Completes the conversion and downloads the CSVs.
-   * @param {Object} result The information of the completed stream.
-   * @param {null | string[]} result.fields
-   * @param {File} result.file
+   * Completes the conversion and calls the completion handler.
    */
-  this.complete = function (result) {
+  this.complete = function () {
     if (_hasConversionFailed) return;
-
-    /** @type {YNABAccountData[]} */
-    const accountsData = [];
-
-    const keys = Object.keys(_accounts);
-    for (let index = 0, account; (account = _accounts[keys[index]]); ++index) {
-      accountsData.push({ csvData: account.toString(), suggestedFilename: account.getSuggestedFilename() })
-    }
-
     _handleCompletion(null, {
       bankName: _bankMapper.getBank(),
-      accounts: accountsData
-    })
+      accounts: _accounts,
+    });
   };
+};
+
+/**
+ * Parse a file as a stream.
+ * @param file {File} A file that should be converted.
+ * @param handleError {YNABConverterCompletionHandler}
+ */
+YNABConverter.convert = (file, handleError) => {
+  const _converter = new YNABConverter(handleError);
+
+  new CSVGood(
+    file,
+    (result) => {
+      _converter.convert(result);
+    },
+    (error) => {
+      _converter.handleError(error);
+    },
+    (result) => {
+      _converter.complete();
+    }
+  );
 };
