@@ -7,6 +7,7 @@
   "author": "Daniël Haitink <danielhaitink@protonmail.com>",
   "license": "MIT",
   "private": true,
+  "type": "module",
   "scripts": {
     "type-check": "tsc --noEmit --pretty"
   },
