@@ -4,9 +4,10 @@
  * @param onStep {Function} The function that will be called when a line is parsed.
  * @param onError {Function} The function that will be called when an error occurs.
  * @param onComplete {Function} The function that will be called when the file stream has been finished.
+ * @param fileType {FileStream.fileTypes} The type of file to read and parse.
  * @constructor
  */
-const CSVGood = function (file, onStep, onError, onComplete) {
+const FileStream = function (file, onStep, onError, onComplete, fileType) {
     let _header = null;
     let _numberOfCols = 0;
     let _firstLineParsed = false;
@@ -29,8 +30,12 @@ const CSVGood = function (file, onStep, onError, onComplete) {
 
     const isHeader = (line) => {
         // Look for empty spaces, dates and IBAN numbers
-        const isNotHeaderRegex = /["']{2}[,;]|[,;]{2}|([\d]{1,4}[\-\/][\d]{1,2}[\-\/][\d]{1,4})|([A-Z]{2}\d{2}[A-Z]{4}\d{10})/g;
-        return !isNotHeaderRegex.test(line);
+        if (fileType === this.fileTypes.CSV) {
+            const isNotHeaderRegex = /["']{2}[,;]|[,;]{2}|([\d]{1,4}[\-\/][\d]{1,2}[\-\/][\d]{1,4})|([A-Z]{2}\d{2}[A-Z]{4}\d{10})/g;
+            return !isNotHeaderRegex.test(line);
+        }
+
+        return false;
     };
 
     const isFillerLine = (line) => {
@@ -48,22 +53,44 @@ const CSVGood = function (file, onStep, onError, onComplete) {
         let cleanedFields = [];
 
         for (let field of fields) {
-            field = field.replace(/(\r\n|\n|\r)/gm,"");
+            switch (fileType) {
+                case this.fileTypes.CSV:
+                    field = field.replace(/(\r\n|\n|\r)/gm,"");
 
-            if (field.endsWith(",") || field.endsWith(";"))
-                field = field.substring(0, field.length - 1);
+                    if (field.endsWith(",") || field.endsWith(";"))
+                        field = field.substring(0, field.length - 1);
 
-            if ((field.startsWith("\"") && field.endsWith("\"")) || (field.startsWith("\'") && field.endsWith("\'")))
-                cleanedFields.push(field.substring(1, field.length - 1));
-            else
-                cleanedFields.push(field);
+                    if ((field.startsWith("\"") && field.endsWith("\"")) ||
+                        (field.startsWith("\'") && field.endsWith("\'")))
+                        cleanedFields.push(field.substring(1, field.length - 1));
+                    else
+                        cleanedFields.push(field);
+                    break;
+                case this.fileTypes.TAB:
+                    field = field.replace(/(\r\n|\n|\r|\t)/gm,"");
+
+                    if (field === "")
+                        continue;
+
+                    cleanedFields.push(field);
+                    break;
+            }
         }
 
         return cleanedFields;
     };
 
     const splitLineToFields = (line) => {
-        const splitFieldsRegex = /("(?:[^"]|"")*"|[^,|;"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
+        let splitFieldsRegex;
+
+        switch (fileType) {
+            case this.fileTypes.CSV:
+                splitFieldsRegex = /("(?:[^"]|"")*"|[^,|;"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
+                break;
+            case this.fileTypes.TAB:
+                splitFieldsRegex = /(.+?)(?:\t|\r\n|$)/g;
+                break;
+        }
 
         let fields = line.match(splitFieldsRegex);
 
@@ -135,7 +162,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
     };
 
     const parseRow = (line) => {
-        if (line === null || line === "")
+        if (line === null || line === "" || line === "\n")
             return null;
 
         if (!_firstLineParsed && isFillerLine(line))
@@ -224,4 +251,9 @@ const CSVGood = function (file, onStep, onError, onComplete) {
     };
 
     streamFile();
+};
+
+FileStream.prototype.fileTypes = {
+    CSV: "csv",
+    TAB: "tab"
 };

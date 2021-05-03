@@ -45,8 +45,14 @@ const parse = function () {
  */
 const parseFile = function (file) {
     const _converter = new YNABConverter();
+    // TODO: force abn detection in YNABConverter if TAB is found?
 
-    new CSVGood(file,
+    let fileType = FileStream.prototype.fileTypes.CSV;
+
+    if (file.name.toLowerCase().endsWith("tab"))
+        fileType = FileStream.prototype.fileTypes.TAB;
+
+    new FileStream(file,
         (result) => {
             _converter.convert(result);
         },
@@ -55,7 +61,8 @@ const parseFile = function (file) {
         },
         (result) => {
             _converter.complete(result);
-        }
+        },
+        fileType
     );
 };
 
@@ -221,14 +228,14 @@ const BankMapper = function (bank) {
      * @param line {String} A line from a CSV.
      * @return {string} The account number.
      */
-    this.getAccount = (line) => getLine(line, _map.account);
+    const getAccount = (line) => getLine(line, _map.account);
 
     /**
      * Return the date in the european format of the current line(DD-MM-YYYY)
      * @param line {String} A line from a CSV.
      * @return {string} The date.
      */
-    this.getDate = (line) => {
+    const getDate = (line) => {
         const dateField = _map.date;
         const text = getLine(line, dateField);
         const dateFormat = _map.dateFormat;
@@ -261,7 +268,7 @@ const BankMapper = function (bank) {
      * @param line {String} A line from a CSV.
      * @return {string} The payee.
      */
-    this.getPayee = (line) => {
+    const getPayee = (line) => {
         let payee = getLine(line, _map.payee);
 
         // Fallback method for ASN and SNS
@@ -284,21 +291,21 @@ const BankMapper = function (bank) {
      * @param line {String} A line from a CSV.
      * @return {string} The category.
      */
-    this.getCategory = (line) => getLine(line, _map.category);
+    const getCategory = (line) => getLine(line, _map.category);
 
     /**
      * Get the memo of the current line
      * @param line {String} A line from a CSV.
      * @return {string} The Memo.
      */
-    this.getMemo = (line) => getLine(line, _map.memo);
+    const getMemo = (line) => getLine(line, _map.memo);
 
     /**
      * Get the inflow of the current line
      * @param line {String} A line from a CSV.
      * @return {string} The inflow.
      */
-    this.getInflow = (line) => {
+    const getInflow = (line) => {
         let value = getLine(line, _map.inflow);
         let indicator = value;
 
@@ -324,7 +331,7 @@ const BankMapper = function (bank) {
      * @param line {String} A line from a CSV.
      * @return {string} The outflow.
      */
-    this.getOutflow = (line) => {
+    const getOutflow = (line) => {
         let value = getLine(line, _map.outflow);
         let indicator = value;
 
@@ -343,6 +350,19 @@ const BankMapper = function (bank) {
         }
 
         return "0";
+    };
+
+    this.parseLine = (line) => {
+        return BankLine(getAccount(line),
+            getDate(line),
+            getPayee(line),
+            getOutflow(line),
+            getInflow(line),
+            getCategory(line),
+            getMemo(line)
+        );
+
+    //    TODO: add abn method here
     };
 };
 
@@ -395,6 +415,16 @@ BankMapper.recognizeBankHeaderless = (fields) => {
     throw "CouldNotBeRecognized";
 };
 
+const BankLine = function (account, date, payee, outflow, inflow, category, memo) {
+  this.account = account;
+  this.date = date;
+  this.payee = payee;
+  this.inflow = inflow;
+  this.outflow = outflow;
+  this.category = category;
+  this.memo = memo;
+};
+
 /**
  * Converts a streamed CSV file to the desired format
  * @constructor
@@ -407,22 +437,22 @@ const YNABConverter = function () {
 
     // Convert the current CSV line
     const convertLine = (line) => {
-        const account = _bankMapper.getAccount(line);
+        line = _bankMapper.parseLine(line);
+
+        const account = line.account;
 
         // If account has not been seen before, create new account
         if (_accounts[account] == null)
             _accounts[account] = new YNABAccountData(account);
 
-        const dataRow = [
-            _bankMapper.getDate(line),
-            _bankMapper.getPayee(line),
-            _bankMapper.getCategory(line),
-            _bankMapper.getMemo(line),
-            _bankMapper.getOutflow(line),
-            _bankMapper.getInflow(line)
-        ];
-
-        _accounts[account].addLine(dataRow);
+        _accounts[account].addLine([
+            line.date,
+            line.payee,
+            line.category,
+            line.memo,
+            line.outflow,
+            line.inflow
+        ]);
     };
 
     /**

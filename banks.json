@@ -296,5 +296,20 @@
     "positiveIndicator": "Credit",
     "negativeIndicator": "Debet",
     "separateIndicator": [3]
+  },
+  "ABN-AMRO": {
+    "bankName": "ABNA",
+    "header": null,
+    "account": [8],
+    "date": [3],
+    "dateFormat": "YYYYMMDD",
+    "payee": [8],
+    "category": [],
+    "memo": [8],
+    "outflow": [7],
+    "inflow": [7],
+    "negativeIndicator": "-",
+    "fileType": "TAB",
+    "convertScript": "ABN"
   }
 }
