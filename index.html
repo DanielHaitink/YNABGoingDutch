@@ -27,8 +27,37 @@
 <div id="content">
     <div id="info">
         This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
-        <br><br>Your CSV will instantly download upon file selection.
-    </div>
+        <br><br>Your CSV will instantly download upon file selection. You can also <a id="toggle-ynab-settings" href="javascript:void(0);">configure this tool to synchronize directly with your online YNAB instance</a>.
+	</div>
+	
+	<div id="ynab-settings">
+		<button type="button" id="ynab-settings-close">X</button>
+		<div>
+			<label for="pat">PAT: </label><input id="pat" type="password">
+			<span><a href="https://api.youneedabudget.com/#personal-access-tokens" target="_blank">How do I get a PAT?</a></span>
+		</div>
+		<div>
+			<span id="pat-input-invalid">Provide a PAT to continue...</span>
+			<span id="pat-input-valid" class="hidden">Ready to link your accounts? <a id="load-ynab-data" href="javascript:void(0);">Click here to load data from YNAB.</a></span>
+			<span id="pat-invalid" class="hidden">Failed to connect to YNAB. Are you sure your PAT is correct?</span>
+		</div>
+		<div id="ynab-connected">
+			<h3>Connected to YNAB, great!</h3>
+			<span>When you drop a file, you can specify exactly how the accounts match. Just FYI, we found the following accounts in YNAB:</span>
+			<table>
+				<thead>
+					<tr><td>Budget</td><td>Account</td></tr>
+				</thead>
+				<tbody>
+					<tr><td>Example Budget</td><td>Example Account 1</td></tr>
+					<tr><td>Example Budget</td><td>Example Account 2</td></tr>
+					<tr><td>Example Budget</td><td>Example Account 3</td></tr>
+					<tr><td>Second Budget</td><td>Example Account 4</td></tr>
+					<tr><td>Second Budget</td><td>Example Account 5</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 
     <div id="drop-area">
         <input id="drop-input" type="file" multiple onchange="parse()">
@@ -53,9 +82,13 @@
     </div>
 </footer>
 
-<script src="js/notie/notie.min.js"></script>
-<script src="js/dropArea.js"></script>
-<script src="js/CSVGood.js"></script>
+<script src="js/notie/notie.min.js" async></script>
+<script src="js/dropArea.js" async></script>
+<script src="js/CSVGood.js" async></script>
+<script src="https://unpkg.com/ynab@latest/dist/browser/ynab.js" async></script>
+
 <script src="js/convert.js"></script>
+<script src="js/ynabConnect.ui.js"></script>
+<script src="js/ynabConnect.app.js"></script>
 </body>
 </html>
