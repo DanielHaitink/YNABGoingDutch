@@ -1,3 +1,8 @@
+:root {
+    --background-color-light: #677380;
+    --background-color: #343a40;
+}
+
 body {
     position: relative;
     max-width: 600px;
@@ -123,6 +128,49 @@ footer {
 
 #content #drop-area.highlight {
     border-color: #d6a14d;
+}
+
+#settings-cog {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    font-size: 40px;
+}
+
+.fas:hover {
+    color: #d6a14d;
+}
+
+.fas:active {
+    color: #ffb300;
+}
+
+#ynab-settings {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    /*max-width: 0px;*/
+    width: 300px;
+    display: none;
+    background: var(--background-color-light);
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+#pat {
+    width: 100%;
+}
+
+#ynab-settings-close {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    font-size: 30px;
+}
+
+#settings-content {
+    margin: 50px 20px;
 }
 
 @media screen and (max-width: 600px) {

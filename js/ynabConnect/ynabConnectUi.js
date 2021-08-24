@@ -1,77 +1,104 @@
-(function () {
+const YNABSettings = function () {
+	const ynabSettingsDiv = document.getElementById("ynab-settings");
+	const invalidPatSpan = document.getElementById("pat-invalid");
+	const ynabConnectedDiv = document.getElementById("ynab-connected");
+	const testConnectionButton = document.getElementById("test-connection");
+	const patInput = document.getElementById("pat");
+	let ynabConnect = null;
+
+	const makeConnection = async function (pat) {
+		ynabConnect = new YNABConnect(pat);
+		return testConnection();
+	}
+
 	const hideElement = function (element) {
 		element.style.display = "none";
 	};
 
-	const ynabSettingsDiv = document.getElementById("ynab-settings");
-	const showYnabSettings = function () {
+	this.showYnabSettings = function () {
+		ynabSettingsDiv.classList.remove("slide-up")
+		ynabSettingsDiv.classList.add("slide-down");
 		ynabSettingsDiv.style.display = "block";
-		const ynabConnect = new YNABConnect(window.localStorage.getItem("pat"));
-		ynabConnect.testConnection();
 	};
+
 	const hideYnabSettings = function () {
-		hideElement(ynabSettingsDiv);
+		ynabSettingsDiv.classList.remove("slide-down")
+		ynabSettingsDiv.classList.add("slide-up");
+		ynabSettingsDiv.style.display = "none";
 	};
 
-	document.getElementById("toggle-ynab-settings").addEventListener("click", showYnabSettings);
-	document.getElementById("ynab-settings-close").addEventListener("click", hideYnabSettings);
-	hideYnabSettings();
+	const testConnection = async function (callback) {
+		return await ynabConnect.testConnection();
+	};
 
+	const init = function () {
+		hideYnabSettings();
+		hideElement(invalidPatSpan);
+		hideElement(ynabConnectedDiv);
 
+		document.getElementById("ynab-settings-close").addEventListener("click", hideYnabSettings);
 
-	const invalidInputSpan = document.getElementById("pat-input-invalid");
-	const validInputSpan = document.getElementById("pat-input-valid");
-	const invalidPatSpan = document.getElementById("pat-invalid");
-	hideElement(validInputSpan);
-	hideElement(invalidPatSpan);
+		testConnectionButton.addEventListener("click", function () {
+			ynabConnect = new YNABConnect(patInput.value);
+			const response = testConnection();
 
-	const ynabConnectedDiv = document.getElementById("ynab-connected");
-	hideElement(ynabConnectedDiv);
-
-	const patInput = document.getElementById("pat");
-	const validatePatInput = function () {
-		invalidInputSpan.style.display = (!patInput.value) ? "inline" : "none";
-		validInputSpan.style.display = (!patInput.value) ? "none" : "inline";
-	}
-	patInput.addEventListener("keyup", validatePatInput);
-	patInput.addEventListener("blur", validatePatInput);
-	patInput.addEventListener("onpaste", validatePatInput);
-
-	const loadYnabDataLink = document.getElementById("load-ynab-data");
-	loadYnabDataLink.addEventListener("click", function () {
-		const ynabConnect = new YNABConnect(patInput.value);
-		window.localStorage.setItem("pat", patInput.value)
-		ynabConnect.testConnection();
-	});
-
-	// TODO: wait until page is loaded
-
-	window.addEventListener("load", () => {
-		if (window.localStorage.getItem("pat") !== null) {
-			const ynabConnect = new YNABConnect(window.localStorage.getItem("pat"));
-			ynabConnect.testConnection();
-
-			const budgets = ynabConnect.getBudgets();
-			console.log(budgets)
-
-			budgets.then((result) => {
-				console.log(result)
-
-				for (const r of result) {
-					console.log(r.getName())
-					const accouts = r.getAccounts()
-
-					accouts.then((accounts) => {
-						console.log(accounts)
-						const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
-						transaction.then((t) => {
-							accounts[0].createTransaction(t)
-
-						})
-						console.log(accounts[0].getName());
-					})
+			response.then((success) => {
+				if (success) {
+					window.localStorage.setItem("pat", patInput.value);
+					ynabConnectedDiv.style.display = "block";
+				}
+				else {
+					console.warn("Could not connect");
 				}
 			})
-		}
-	});
-})();
+		});
+
+		window.addEventListener("load", () => {
+			if (window.localStorage.getItem("pat") !== null) {
+				ynabConnect = new YNABConnect(window.localStorage.getItem("pat"));
+				patInput.value = window.localStorage.getItem("pat");
+				const promise = testConnection();
+
+				promise.then((success) => {
+					if (success) {
+						notie.alert({type: "success", text: "Connected to YNAB!"});
+						ynabConnectedDiv.style.display = "block";
+					}
+					else {
+						notie.alert({type: "warning", text: "Previously used PAT could not be used!"});
+					}
+				});
+
+				// const budgets = ynabConnect.getBudgets();
+				// console.log(budgets)
+				//
+				// budgets.then((result) => {
+				// 	console.log(result)
+				//
+				// 	for (const r of result) {
+				// 		console.log(r.getName())
+				// 		const accouts = r.getAccounts()
+				//
+				// 		accouts.then((accounts) => {
+				// 			console.log(accounts)
+				// 			const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
+				// 			// transaction.then((t) => {
+				// 			// 	accounts[0].createTransaction(t)
+				// 			//
+				// 			// })
+				// 			console.log(accounts[0].getName());
+				// 		})
+				// 	}
+				// })
+			}
+		});
+	};
+
+	init();
+};
+
+const ynabSettings = new YNABSettings();
+
+const toggleYnabSettings = function () {
+	ynabSettings.showYnabSettings();
+};

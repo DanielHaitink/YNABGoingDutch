@@ -65,13 +65,12 @@ const parseFile = function (file) {
  * @constructor
  */
 const YNABAccountData = function (accountNumber) {
-    let _csvData = [
-        ["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"]
-    ];
+    const _header = ["Date", "Payee", "Category", "Memo", "Outflow", "Inflow"];
+    const _data = [];
 
     /**
      * Add a line to the CSV.
-     * @param data {Array} An array of strings.
+     * @param data {{}} An array of strings.
      */
     this.addLine = (data) => {
         if (YNABAccountData.DATA_DIMENSION !== data.length) {
@@ -79,7 +78,7 @@ const YNABAccountData = function (accountNumber) {
             return;
         }
 
-        _csvData.push(data);
+        _data.push(data);
     };
 
     /**
@@ -87,15 +86,11 @@ const YNABAccountData = function (accountNumber) {
      */
     this.downloadCSV = () => {
         let blobText = "";
+        blobText += _header.join(",");
 
-        for (const line of _csvData) {
-            for (const item of line) {
-                blobText += "\"" + item + "\"";
-
-                if (item !== line[line.length - 1])
-                    blobText += ",";
-            }
-            blobText += "\r\n";
+        for (const line of _data) {
+            blobText += "\"" + line.date + "\",\"" + line.payee + "\",\"" + line.category + "\",\"" +
+                line.memo + "\",\"" + line.outflow + "\",\"" + line.inflow + "\"\r\n";
         }
 
         const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
@@ -413,14 +408,14 @@ const YNABConverter = function () {
         if (_accounts[account] == null)
             _accounts[account] = new YNABAccountData(account);
 
-        const dataRow = [
-            _bankMapper.getDate(line),
-            _bankMapper.getPayee(line),
-            _bankMapper.getCategory(line),
-            _bankMapper.getMemo(line),
-            _bankMapper.getOutflow(line),
-            _bankMapper.getInflow(line)
-        ];
+        const dataRow = {
+            date: _bankMapper.getDate(line),
+            payee: _bankMapper.getPayee(line),
+            category: _bankMapper.getCategory(line),
+            memo: _bankMapper.getMemo(line),
+            outflow: _bankMapper.getOutflow(line),
+            inflow: _bankMapper.getInflow(line)
+        };
 
         _accounts[account].addLine(dataRow);
     };
@@ -490,6 +485,9 @@ const YNABConverter = function () {
         const keys = Object.keys(_accounts);
 
         for (let index = 0, account; account = _accounts[keys[index]]; ++index) {
+            // TODO: if connected to YNAB and user wants to connect, generate YNAB transactions
+            // IF using the PAT, show one account and wait for user input.
+
             account.downloadCSV();
         }
     };
