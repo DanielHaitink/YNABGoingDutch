@@ -73,11 +73,6 @@ const YNABAccountData = function (accountNumber) {
      * @param data {{}} An array of strings.
      */
     this.addLine = (data) => {
-        if (YNABAccountData.DATA_DIMENSION !== data.length) {
-            console.error("Data is of the wrong size!");
-            return;
-        }
-
         _data.push(data);
     };
 
@@ -85,12 +80,15 @@ const YNABAccountData = function (accountNumber) {
      * Prompt a download for the new CSV file.
      */
     this.downloadCSV = () => {
-        let blobText = "";
-        blobText += _header.join(",");
+        let blobText = _header.join(",") + "\r\n";
 
         for (const line of _data) {
-            blobText += "\"" + line.date + "\",\"" + line.payee + "\",\"" + line.category + "\",\"" +
-                line.memo + "\",\"" + line.outflow + "\",\"" + line.inflow + "\"\r\n";
+            try {
+                blobText += "\"" + line.date + "\",\"" + line.payee + "\",\"" + line.category + "\",\"" +
+                    line.memo + "\",\"" + line.outflow + "\",\"" + line.inflow + "\"\r\n";
+            } catch (error) {
+                console.error("Skipped line: " + error.toString());
+            }
         }
 
         const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
@@ -118,8 +116,6 @@ const YNABAccountData = function (accountNumber) {
         }
     };
 };
-
-YNABAccountData.DATA_DIMENSION = 6;
 
 /**
  * A mapping, which maps the bank CSVs to the YNAB format.

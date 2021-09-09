@@ -149,7 +149,7 @@ footer {
     position: fixed;
     right: 0;
     top: 0;
-    height: 100vh;
+    height: 100%;
     /*max-width: 0px;*/
     width: 300px;
     display: none;

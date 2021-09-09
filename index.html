@@ -45,9 +45,25 @@
     </div>
 </div>
 
-<div id="settings-cog" onclick="toggleYnabSettings()" alt="settings" about="settings">
+<div id="settings-cog" onclick="toggleYnabSettings()" about="settings">
     <i class="fas fa-cog"></i>
 </div>
+
+<!--<div id="ynab-sync-select">-->
+<!--    <div id="select-budget">-->
+
+<!--    </div>-->
+<!--    <div id="select-account">-->
+
+<!--    </div>-->
+<!--    <div id="selection-confirm">-->
+<!--        <p>-->
+<!--            Are you sure you want to use this account?-->
+<!--        </p>-->
+<!--        <input type="button" value="Yes">-->
+<!--        <input type="button" value="No">-->
+<!--    </div>-->
+<!--</div>-->
 
 <div id="ynab-settings">
     <i id="ynab-settings-close" class="fas fa-times"></i>
@@ -68,9 +84,17 @@
             When you have obtained a valid PAT, please paste it in the field below and click on the <i>test connection</i> button.
         </p>
         <div>
+            <div>
+                <label class="switch" for="auto-sync">
+                    Sync
+                </label>
+                <input type="checkbox" id="auto-sync">
+            </div>
             <label for="pat"></label><input id="pat" type="text" placeholder="PAT">
             <input id="test-connection" type="button" name="test-connection" value="Test connection">
             <input id="clear-pat" type="button" name="clear-pat" value="Clear PAT">
+            <input id="export-settings" type="button" name="export-settings" value="Export settings">
+            <input id="import-settings" type="button" name="import-settings" value="Import settings">
         </div>
         <div>
             <span id="pat-invalid" class="hidden">Failed to connect to YNAB. Are you sure your PAT is correct?</span>
