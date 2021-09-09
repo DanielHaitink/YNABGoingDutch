@@ -173,6 +173,34 @@ footer {
     margin: 50px 20px;
 }
 
+#selection-popup {
+    /*position: fixed;*/
+
+
+    border-radius: 7px;
+    background: #57bf57;
+    margin: auto;
+    padding:40px;
+
+    position:absolute;
+    width:800px;
+    top: 50%;
+    left: 50%;
+    margin-left: -400px; // 1/2 width
+    margin-top: -40px; // 1/2 height
+}
+
+#selection-popup p {
+    width: 100%;
+}
+#selection-popup select {
+    width: 100%;
+}
+
+#selection-popup button {
+
+}
+
 @media screen and (max-width: 600px) {
     header {
         padding-left: 5px;
