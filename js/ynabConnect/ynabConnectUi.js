@@ -1,13 +1,12 @@
-const YNABSettings = function () {
+const YNABSettings = function (ynabConnect) {
 	const ynabSettingsDiv = document.getElementById("ynab-settings");
 	const invalidPatSpan = document.getElementById("pat-invalid");
 	const ynabConnectedDiv = document.getElementById("ynab-connected");
 	const testConnectionButton = document.getElementById("test-connection");
 	const patInput = document.getElementById("pat");
-	let ynabConnect = null;
 
 	const makeConnection = async function (pat) {
-		ynabConnect = new YNABConnect(pat);
+		ynabConnect.connect(pat);
 		return testConnection();
 	}
 
@@ -39,7 +38,7 @@ const YNABSettings = function () {
 		document.getElementById("ynab-settings-close").addEventListener("click", hideYnabSettings);
 
 		testConnectionButton.addEventListener("click", function () {
-			ynabConnect = new YNABConnect(patInput.value);
+			ynabConnect.connect(patInput.value);
 			const response = testConnection();
 
 			response.then((success) => {
@@ -53,9 +52,8 @@ const YNABSettings = function () {
 			})
 		});
 
-		window.addEventListener("load", () => {
 			if (window.localStorage.getItem("pat") !== null) {
-				ynabConnect = new YNABConnect(window.localStorage.getItem("pat"));
+				ynabConnect.connect(window.localStorage.getItem("pat"));
 				patInput.value = window.localStorage.getItem("pat");
 				const promise = testConnection();
 
@@ -91,14 +89,7 @@ const YNABSettings = function () {
 				// 	}
 				// })
 			}
-		});
 	};
 
 	init();
-};
-
-const ynabSettings = new YNABSettings();
-
-const toggleYnabSettings = function () {
-	ynabSettings.showYnabSettings();
 };

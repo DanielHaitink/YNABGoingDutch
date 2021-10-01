@@ -22,7 +22,7 @@ const SelectionPopup = function (text, options, callback, acceptText = "accept",
         element.id = SelectionPopup.ID;
 
         let index = 0;
-        for (const option in options) {
+        for (const option of options) {
             const optionElement = document.createElement("option");
             optionElement.value = (index++).toString();
             optionElement.innerText = option;
