@@ -72,7 +72,8 @@ const YNABSettings = function (ynabConnect) {
 		})
 
 		testConnectionButton.addEventListener("click", function () {
-			ynabConnect.connect(patInput.value);
+			let pat = patInput.value;
+			ynabConnect.connect(pat);
 			const response = testConnection();
 
 			response.then((success) => {
@@ -87,44 +88,44 @@ const YNABSettings = function (ynabConnect) {
 			})
 		});
 
-			if (window.localStorage.getItem("pat") !== null) {
-				ynabConnect.connect(window.localStorage.getItem("pat"));
-				patInput.value = window.localStorage.getItem("pat");
-				const promise = testConnection();
+		if (window.localStorage.getItem("pat") !== null) {
+			ynabConnect.connect(window.localStorage.getItem("pat"));
+			patInput.value = window.localStorage.getItem("pat");
+			const promise = testConnection();
 
-				checkRetrieved();
+			checkRetrieved();
 
-				// promise.then((success) => {
-				// 	if (success) {
-				// 		notie.alert({type: "success", text: "Connected to YNAB!"});
-				// 		ynabConnectedDiv.style.display = "block";
-				// 	}
-				// 	else {
-				// 		notie.alert({type: "warning", text: "Previously used PAT could not be used!"});
-				// 	}
-				// });
+			// promise.then((success) => {
+			// 	if (success) {
+			// 		notie.alert({type: "success", text: "Connected to YNAB!"});
+			// 		ynabConnectedDiv.style.display = "block";
+			// 	}
+			// 	else {
+			// 		notie.alert({type: "warning", text: "Previously used PAT could not be used!"});
+			// 	}
+			// });
 
-				// const budgets = ynabConnect.getBudgets();
-				// console.log(budgets)
-				//
-				// budgets.then((result) => {
-				// 	console.log(result)
-				//
-				// 	for (const r of result) {
-				// 		console.log(r.getName())
-				// 		const accouts = r.getAccounts()
-				//
-				// 		accouts.then((accounts) => {
-				// 			console.log(accounts)
-				// 			const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
-				// 			// transaction.then((t) => {
-				// 			// 	accounts[0].createTransaction(t)
-				// 			//
-				// 			// })
-				// 			console.log(accounts[0].getName());
-				// 		})
-				// 	}
-				// })
+			// const budgets = ynabConnect.getBudgets();
+			// console.log(budgets)
+			//
+			// budgets.then((result) => {
+			// 	console.log(result)
+			//
+			// 	for (const r of result) {
+			// 		console.log(r.getName())
+			// 		const accouts = r.getAccounts()
+			//
+			// 		accouts.then((accounts) => {
+			// 			console.log(accounts)
+			// 			const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
+			// 			// transaction.then((t) => {
+			// 			// 	accounts[0].createTransaction(t)
+			// 			//
+			// 			// })
+			// 			console.log(accounts[0].getName());
+			// 		})
+			// 	}
+			// })
 			}
 	};
 
@@ -170,7 +171,7 @@ const YNABSettingsStorage = function () {
 	};
 
 	const init = function () {
-		window.addEventListener("load", () => retrieveFromStorage());
+		retrieveFromStorage();
 	};
 
 	init();
