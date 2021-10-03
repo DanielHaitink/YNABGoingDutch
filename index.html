@@ -28,11 +28,11 @@
 <div id="content">
     <div id="info">
         This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
-        <br><br>Your CSV will instantly download upon file selection. You can also <a href="javascript:toggleYnabSettings()">configure this tool to synchronize directly with your online YNAB instance</a>.
+        <br><br>Your CSV will instantly download upon file selection. You can also configure this tool to synchronize directly with your online YNAB instance. Click on the options button in the upper right corner.
 	</div>
 
     <div id="drop-area">
-        <input id="drop-input" type="file" multiple onchange="parse()">
+        <input id="drop-input" type="file" multiple>
         <div id="drop-text">
             Drop your files in here!<br>Or click here to select files
         </div>
@@ -45,7 +45,7 @@
     </div>
 </div>
 
-<div id="settings-cog" onclick="toggleYnabSettings()" about="settings">
+<div id="settings-cog" alt="settings" about="settings">
     <i class="fas fa-cog"></i>
 </div>
 
@@ -120,14 +120,18 @@
     </div>
 </footer>
 
-<script src="js/dropArea.js"></script>
-<script src="js/notie/notie.min.js" async></script>
-<script src="js/CSVGood.js" async></script>
 <script src="https://unpkg.com/ynab@latest/dist/browser/ynab.js" async></script>
-
-<script src="js/convert.js" async></script>
+<script src="js/notie/notie.min.js" async></script>
+<script src="js/dropArea.js"></script>
+<script src="js/CSVGood.js" async></script>
+<script src="js/accountData.js" async></script>
+<script src="js/bankMap.js" async></script>
+<script src="js/bankMapper.js" async></script>
 <script src="js/ynabConnect/ynabConnectUi.js" async></script>
 <script src="js/ynabConnect/ynabConnect.js" async></script>
 <script src="js/ynabConnect/selectionPopup.js"></script>
+<script src="js/convert.js" async></script>
+<script src="js/app.js" async></script>
+
 </body>
 </html>

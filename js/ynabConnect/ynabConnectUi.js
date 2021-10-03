@@ -1,15 +1,14 @@
-const YNABSettings = function () {
+const YNABSettings = function (ynabConnect) {
 	const ynabSettingsDiv = document.getElementById("ynab-settings");
 	const invalidPatSpan = document.getElementById("pat-invalid");
 	const ynabConnectedDiv = document.getElementById("ynab-connected");
 	const testConnectionButton = document.getElementById("test-connection");
 	const patInput = document.getElementById("pat");
 	const syncInput = document.getElementById("auto-sync");
-	let ynabConnect = null;
-	const ynabStorage = new YNABSettingsStorage();
+	const ynabStorage = new YNABSettingsStorage()
 
 	const makeConnection = async function (pat) {
-		ynabConnect = new YNABConnect(pat);
+		ynabConnect.connect(pat);
 		return testConnection();
 	}
 
@@ -73,8 +72,7 @@ const YNABSettings = function () {
 		})
 
 		testConnectionButton.addEventListener("click", function () {
-			const pat = patInput.value;
-			ynabConnect = new YNABConnect(pat);
+			ynabConnect.connect(patInput.value);
 			const response = testConnection();
 
 			response.then((success) => {
@@ -89,51 +87,45 @@ const YNABSettings = function () {
 			})
 		});
 
-		window.addEventListener("load", () => {
-			// while (!ynabStorage.retrieved) {
-			//
-			// }
+			if (window.localStorage.getItem("pat") !== null) {
+				ynabConnect.connect(window.localStorage.getItem("pat"));
+				patInput.value = window.localStorage.getItem("pat");
+				const promise = testConnection();
 
-			checkRetrieved();
+				checkRetrieved();
 
-			// if (window.localStorage.getItem("pat") !== null) {
-			// 	ynabConnect = new YNABConnect(window.localStorage.getItem("pat"));
-			// 	patInput.value = window.localStorage.getItem("pat");
-			// 	const promise = testConnection();
-			//
-			// 	promise.then((success) => {
-			// 		if (success) {
-			// 			notie.alert({type: "success", text: "Connected to YNAB!"});
-			// 			ynabConnectedDiv.style.display = "block";
-			// 		}
-			// 		else {
-			// 			notie.alert({type: "warning", text: "Previously used PAT could not be used!"});
-			// 		}
-			// 	});
-			//
-			// 	// const budgets = ynabConnect.getBudgets();
-			// 	// console.log(budgets)
-			// 	//
-			// 	// budgets.then((result) => {
-			// 	// 	console.log(result)
-			// 	//
-			// 	// 	for (const r of result) {
-			// 	// 		console.log(r.getName())
-			// 	// 		const accouts = r.getAccounts()
-			// 	//
-			// 	// 		accouts.then((accounts) => {
-			// 	// 			console.log(accounts)
-			// 	// 			const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
-			// 	// 			// transaction.then((t) => {
-			// 	// 			// 	accounts[0].createTransaction(t)
-			// 	// 			//
-			// 	// 			// })
-			// 	// 			console.log(accounts[0].getName());
-			// 	// 		})
-			// 	// 	}
-			// 	// })
-			// }
-		});
+				// promise.then((success) => {
+				// 	if (success) {
+				// 		notie.alert({type: "success", text: "Connected to YNAB!"});
+				// 		ynabConnectedDiv.style.display = "block";
+				// 	}
+				// 	else {
+				// 		notie.alert({type: "warning", text: "Previously used PAT could not be used!"});
+				// 	}
+				// });
+
+				// const budgets = ynabConnect.getBudgets();
+				// console.log(budgets)
+				//
+				// budgets.then((result) => {
+				// 	console.log(result)
+				//
+				// 	for (const r of result) {
+				// 		console.log(r.getName())
+				// 		const accouts = r.getAccounts()
+				//
+				// 		accouts.then((accounts) => {
+				// 			console.log(accounts)
+				// 			const transaction = Transaction.createTransaction(accounts[0], "Albert Heijn", "2021-08-23", -77, "test")
+				// 			// transaction.then((t) => {
+				// 			// 	accounts[0].createTransaction(t)
+				// 			//
+				// 			// })
+				// 			console.log(accounts[0].getName());
+				// 		})
+				// 	}
+				// })
+			}
 	};
 
 	init();
@@ -183,9 +175,3 @@ const YNABSettingsStorage = function () {
 
 	init();
 }
-
-const ynabSettings = new YNABSettings();
-
-const toggleYnabSettings = function () {
-	ynabSettings.showYnabSettings();
-};

@@ -1,8 +1,13 @@
 let api = null;
 
-const YNABConnect = function (pat) {
-	api = new window.ynab.API(pat)
+const YNABConnect = function () {
 	const _budgets = []
+	let _pat = null;
+
+	this.connect = (pat) => {
+		_pat = pat;
+		api = new window.ynab.API(pat)
+	};
 
 	this.testConnection = async function () {
 		try {
