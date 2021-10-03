@@ -19,8 +19,18 @@ const YNABAccountData = function (accountNumber) {
      * Create syncable transactions for the YNAB api.
      * @return [Transaction]
      */
-    this.getTransactions = ()  => {
-        //TODO: create YNAB transactions
+    this.getTransactions = (account)  => {
+        //TODO: create YNAB transacions
+        const transactions = []
+        for (const line of _data) {
+            Transaction.createTransaction(account, line.payee, line.date, line.outflow ? line.outflow < 0 : line.inflow, line.memo + "\tYNABGoingDutch").then(
+                (transaction) => {
+                    transactions.push(transaction);
+                }
+            );
+        }
+
+        return transactions;
     };
 
     /**

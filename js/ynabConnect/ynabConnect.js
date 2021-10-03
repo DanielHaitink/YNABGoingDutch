@@ -122,10 +122,10 @@ const YNABAccount = function (account, budget) {
 
 			// TODO: update occurrence numbers of transactions
 
-			const jsonTransactions = []
+			const jsonTransactions = [];
 			transactions.forEach((a) => jsonTransactions.push(a.getYNABTransaction()));
 
-			console.log(jsonTransaction)
+			console.log(jsonTransactions)
 
 			await api.transactions.createTransactions(budget.getId(),{transactions: jsonTransactions});
 		}
@@ -183,6 +183,7 @@ const Transaction = function (account, payee, date, amount, memo) {
 
 		if (payee.getId() !== null)
 			transaction.payee_id = payee.getId();
+		// TODO: does not wait for payee.getId
 
 		return transaction;
 	}

@@ -27,30 +27,33 @@ const App = function () {
     };
 
     const finishConvert = (data) => {
-        const syncAccount = (account) => {
+        const syncAccount = (account,accountData) => {
             console.log(account.getName());
+            const transactions = accountData.getTransactions(account);
 
+            console.log(transactions);
+            account.createTransactions(transactions);
         }
 
-        const chooseAccount = (budget) => {
+        const chooseAccount = (budget, accountData) => {
             console.log(budget.getName());
             budget.getAccounts().then(
                 (accounts) => {
                     const accountNames = [];
                     accounts.forEach(e => accountNames.push(e.getName()));
-                    new SelectionPopup("Which account?", accountNames, (e) => syncAccount(accounts[e]));
+                    new SelectionPopup("Which account?", accountNames, (e) => syncAccount(accounts[e], accountData));
                 }
             )
         };
 
-        for (const key in Object.keys(data)) {
+        for (const [key, value] of Object.entries(data)) {
             console.log(key);
 
             ynabConnect.getBudgets().then(
                 (budgets) => {
                     const budgetNames = [];
                     budgets.forEach(e => budgetNames.push(e.getName()))
-                    new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e]));
+                    new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e], value));
                 }
             );
             // ynabConnect
