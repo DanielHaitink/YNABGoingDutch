@@ -16,6 +16,14 @@ const YNABAccountData = function (accountNumber) {
     };
 
     /**
+     * Create syncable transactions for the YNAB api.
+     * @return [Transaction]
+     */
+    this.getTransactions = ()  => {
+        //TODO: create YNAB transactions
+    };
+
+    /**
      * Prompt a download for the new CSV file.
      */
     this.downloadCSV = () => {

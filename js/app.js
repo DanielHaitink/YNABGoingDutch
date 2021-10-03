@@ -27,6 +27,22 @@ const App = function () {
     };
 
     const finishConvert = (data) => {
+        const syncAccount = (account) => {
+            console.log(account.getName());
+
+        }
+
+        const chooseAccount = (budget) => {
+            console.log(budget.getName());
+            budget.getAccounts().then(
+                (accounts) => {
+                    const accountNames = [];
+                    accounts.forEach(e => accountNames.push(e.getName()));
+                    new SelectionPopup("Which account?", accountNames, (e) => syncAccount(accounts[e]));
+                }
+            )
+        };
+
         for (const key in Object.keys(data)) {
             console.log(key);
 
@@ -34,7 +50,7 @@ const App = function () {
                 (budgets) => {
                     const budgetNames = [];
                     budgets.forEach(e => budgetNames.push(e.getName()))
-                    new SelectionPopup("Which budget?", budgetNames, (e) => console.log(e));
+                    new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e]));
                 }
             );
             // ynabConnect
