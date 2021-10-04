@@ -36,7 +36,7 @@ const App = function () {
             });
         };
 
-        const syncAccount = (account,accountData) => {
+        const syncAccount = (account, accountData) => {
             if (account == null)
                 return fallbackPopup(accountData);
 
@@ -57,7 +57,11 @@ const App = function () {
 
                     promise.catch(
                         (error) => {
-                            notie.alert({type: "error", text: "Error while syncing the transactions.", position: "bottom"});
+                            notie.alert({
+                                type: "error",
+                                text: "Error while syncing the transactions.",
+                                position: "bottom"
+                            });
                         }
                     );
                 }

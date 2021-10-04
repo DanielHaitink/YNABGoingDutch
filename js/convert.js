@@ -87,8 +87,10 @@ const Converter = function (bankMap, onConverted) {
         if (_hasConversionFailed)
             return;
 
-        notie.alert({type: "success", text: result.file.name + " is completed successfully. Converted as " +
-                _bankMapper.getBank(), position: "bottom"});
+        notie.alert({
+            type: "success", text: result.file.name + " is completed successfully. Converted as " +
+                _bankMapper.getBank(), position: "bottom"
+        });
 
         const keys = Object.keys(_accounts);
 

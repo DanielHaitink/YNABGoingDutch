@@ -19,11 +19,12 @@ const YNABAccountData = function (accountNumber) {
      * Create syncable transactions for the YNAB api.
      * @return [Transaction]
      */
-    this.getTransactions = async (account)  => {
+    this.getTransactions = async (account) => {
         const transactions = []
         for (const line of _data) {
             const amount = line.outflow > 0 ? -line.outflow : line.inflow;
-            const transaction = await Transaction.createTransaction(account, line.payee, line.date, amount, line.memo + "\tYGD");
+            const transaction = await Transaction.createTransaction(account, line.payee, line.date, amount,
+                line.memo + "\tYGD");
 
             transactions.push(transaction);
         }
@@ -43,7 +44,7 @@ const YNABAccountData = function (accountNumber) {
                 line.memo + "\",\"" + line.outflow + "\",\"" + line.inflow + "\"\r\n";
         }
 
-        const date = new Date().toJSON().slice(0,10).replace(/-/g,"\/");
+        const date = new Date().toJSON().slice(0, 10).replace(/-/g, "\/");
         const fileName = "ynab_" + accountNumber + "_" + date + ".csv";
         const blob = new Blob([blobText], {
             type: "text/csv;charset=utf-8;"
