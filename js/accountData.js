@@ -23,7 +23,7 @@ const YNABAccountData = function (accountNumber) {
         const transactions = []
         for (const line of _data) {
             const amount = line.outflow > 0 ? -line.outflow : line.inflow;
-            const transaction = await Transaction.createTransaction(account, line.payee, line.date, amount, line.memo + "\tYNABGoingDutch");
+            const transaction = await Transaction.createTransaction(account, line.payee, line.date, amount, line.memo + "\tYGD");
 
             transactions.push(transaction);
         }

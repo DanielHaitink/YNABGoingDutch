@@ -239,11 +239,13 @@ const Transaction = function (account, payee, date, amount, memo) {
 	this.getAmount = () => amount;
 
 	this.getYNABTransaction = function (occurrence) {
+		createImportId(occurrence);
+
 		const transaction = {
 			account_id: account.getId(),
 			category_id: null,
 			payee_name: payee.getName(),
-			cleared: window.ynab.SaveTransaction.ClearedEnum.Cleared,
+			cleared: window.ynab.SaveTransaction.ClearedEnum.Uncleared,
 			approved: true,
 			date: date, // YYYY-MM-DD
 			amount: amount,
@@ -253,25 +255,25 @@ const Transaction = function (account, payee, date, amount, memo) {
 
 		if (payee.getId() !== null)
 			transaction.payee_id = payee.getId();
-		// TODO: does not wait for payee.getId
-
-		createImportId(occurrence);
 
 		return transaction;
 	}
-
-	createImportId();
 };
 
 Transaction.createTransaction = async function (account, payeeName, date, amount, memo) {
 	const payee = await account.getPayee(payeeName);
 
 	const ynabAmount = Math.floor(amount * 1000)
-	//
-	// console.log("payee")
-	// console.log(payee)
-	// console.log(payee.getName())
-	// console.log(payee.getId())
+
+	if (memo.length > 200) {
+		// clean memo
+		memo = memo.replace( /\s{2,}/g, ' ' );
+
+		if (memo.length > 200) // if still too long, cut memo
+			memo = memo.slice(0, 199);
+
+		console.log("memo too long, split memo");
+	}
 
 	return new Transaction(account, payee, date, ynabAmount, memo);
 }

@@ -55,7 +55,7 @@ const App = function () {
                         }
                     );
 
-                    promise.error(
+                    promise.catch(
                         (error) => {
                             notie.alert({type: "error", text: "Error while syncing the transactions.", position: "bottom"});
                         }
