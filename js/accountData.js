@@ -19,15 +19,13 @@ const YNABAccountData = function (accountNumber) {
      * Create syncable transactions for the YNAB api.
      * @return [Transaction]
      */
-    this.getTransactions = (account)  => {
-        //TODO: create YNAB transacions
+    this.getTransactions = async (account)  => {
         const transactions = []
         for (const line of _data) {
-            Transaction.createTransaction(account, line.payee, line.date, line.outflow ? line.outflow < 0 : line.inflow, line.memo + "\tYNABGoingDutch").then(
-                (transaction) => {
-                    transactions.push(transaction);
-                }
-            );
+            const amount = line.outflow > 0 ? -line.outflow : line.inflow;
+            const transaction = await Transaction.createTransaction(account, line.payee, line.date, amount, line.memo + "\tYNABGoingDutch");
+
+            transactions.push(transaction);
         }
 
         return transactions;
@@ -38,7 +36,7 @@ const YNABAccountData = function (accountNumber) {
      */
     this.downloadCSV = () => {
         let blobText = "";
-        blobText += _header.join(",");
+        blobText += _header.join(",") + "\r\n";
 
         for (const line of _data) {
             blobText += "\"" + line.date + "\",\"" + line.payee + "\",\"" + line.category + "\",\"" +

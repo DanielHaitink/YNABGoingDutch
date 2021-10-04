@@ -145,6 +145,13 @@ footer {
     color: #ffb300;
 }
 
+.highlight {
+    color: #d6a14d;
+    /*text-decoration: #d6a14d solid 2px underline;*/
+    font-size: 20px;
+    font-weight: bolder;
+}
+
 #ynab-settings {
     position: fixed;
     right: 0;
@@ -173,7 +180,8 @@ footer {
     margin: 50px 20px;
 }
 
-#selection-popup {
+#selection-popup,
+#question-popup{
     /*position: fixed;*/
 
 
@@ -190,14 +198,16 @@ footer {
     margin-top: -40px; // 1/2 height
 }
 
-#selection-popup p {
+#selection-popup p,
+#question-popup p{
     width: 100%;
 }
 #selection-popup select {
     width: 100%;
 }
 
-#selection-popup button {
+#selection-popup button,
+#question-popup button{
 
 }
 

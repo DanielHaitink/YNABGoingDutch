@@ -3,7 +3,8 @@ const App = function () {
     let bankMapLoaded = false;
     let bankMap = new BankMap("banks.json", () => bankMapLoaded = true);
     const ynabConnect = new YNABConnect();
-    const ynabSettings = new YNABSettings(ynabConnect);
+    const settingsStorage = new YNABSettingsStorage();
+    const ynabSettings = new YNABSettings(ynabConnect, settingsStorage);
     const converter = new Converter(bankMap, e => finishConvert(e));
 
     /**
@@ -27,18 +28,52 @@ const App = function () {
     };
 
     const finishConvert = (data) => {
-        const syncAccount = (account,accountData) => {
-            console.log(account.getName());
-            const transactions = accountData.getTransactions(account);
+        const fallbackPopup = (accountData) => {
+            new QuestionPopup("Would you like to download the CSV?", (answer) => {
+                if (answer) {
+                    accountData.downloadCSV();
+                }
+            });
+        };
 
-            console.log(transactions);
-            account.createTransactions(transactions);
-        }
+        const syncAccount = (account,accountData) => {
+            if (account == null)
+                return fallbackPopup(accountData);
+
+            console.log(account.getName());
+            accountData.getTransactions(account).then(
+                (transactions) => {
+                    if (transactions == null)
+                        return fallbackPopup(accountData);
+
+                    console.log(transactions);
+                    const promise = account.createTransactions(transactions);
+
+                    promise.then(
+                        () => {
+                            notie.alert({type: "success", text: "Synced the transactions.", position: "bottom"});
+                        }
+                    );
+
+                    promise.error(
+                        (error) => {
+                            notie.alert({type: "error", text: "Error while syncing the transactions.", position: "bottom"});
+                        }
+                    );
+                }
+            );
+        };
 
         const chooseAccount = (budget, accountData) => {
+            if (budget == null)
+                return fallbackPopup(accountData);
+
             console.log(budget.getName());
             budget.getAccounts().then(
                 (accounts) => {
+                    if (accounts == null)
+                        return fallbackPopup(accountData);
+
                     const accountNames = [];
                     accounts.forEach(e => accountNames.push(e.getName()));
                     new SelectionPopup("Which account?", accountNames, (e) => syncAccount(accounts[e], accountData));
@@ -49,14 +84,22 @@ const App = function () {
         for (const [key, value] of Object.entries(data)) {
             console.log(key);
 
-            ynabConnect.getBudgets().then(
-                (budgets) => {
-                    const budgetNames = [];
-                    budgets.forEach(e => budgetNames.push(e.getName()))
-                    new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e], value));
-                }
-            );
-            // ynabConnect
+
+            if (settingsStorage.isAutoSync() && ynabConnect.isConnected()) {
+                ynabConnect.getBudgets().then(
+                    (budgets) => {
+                        if (budgets == null)
+                            return fallbackPopup(value);
+
+                        const budgetNames = [];
+                        budgets.forEach(e => budgetNames.push(e.getName()))
+                        new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e], value));
+                    }
+                );
+            } else {
+                // Download file
+                value.downloadCSV();
+            }
         }
     };
 

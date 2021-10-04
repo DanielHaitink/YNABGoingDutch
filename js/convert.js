@@ -104,6 +104,9 @@ const Converter = function (bankMap, onConverted) {
         }
     };
 
+    /**
+     * Clear the convert data, such that a new account can be converted.
+     */
     this.clear = () => {
         const keys = Object.keys(_accounts);
         keys.forEach(e => delete _accounts[e]);

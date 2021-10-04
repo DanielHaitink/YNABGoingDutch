@@ -28,7 +28,10 @@
 <div id="content">
     <div id="info">
         This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
-        <br><br>Your CSV will instantly download upon file selection. You can also configure this tool to synchronize directly with your online YNAB instance. Click on the options button in the upper right corner.
+        <br><br>Your CSV will instantly download upon file selection.
+        <br><br>
+        <span class="highlight">NEW:</span> You can also configure this tool to synchronize directly with your YNAB account. Click on the options button in the upper right corner for more information.
+        This function is still in BETA, use it at your own risk. If you run into problems, please create an issue at <a href="https://github.com/danielswrath/YNABGoingDutch/issues">Github</a>
 	</div>
 
     <div id="drop-area">
@@ -49,22 +52,6 @@
     <i class="fas fa-cog"></i>
 </div>
 
-<!--<div id="ynab-sync-select">-->
-<!--    <div id="select-budget">-->
-
-<!--    </div>-->
-<!--    <div id="select-account">-->
-
-<!--    </div>-->
-<!--    <div id="selection-confirm">-->
-<!--        <p>-->
-<!--            Are you sure you want to use this account?-->
-<!--        </p>-->
-<!--        <input type="button" value="Yes">-->
-<!--        <input type="button" value="No">-->
-<!--    </div>-->
-<!--</div>-->
-
 <div id="ynab-settings">
     <i id="ynab-settings-close" class="fas fa-times"></i>
     <div id="settings-content">
@@ -72,7 +59,7 @@
             Settings (BETA)
         </h2>
         <p>
-            <b>These settings are still being developed and tested. Use them at your own risk.</b>
+            <b>These settings are actively developed and tested. Use them at your own risk.</b>
         </p>
         <p>
             YNAB Going Dutch can automate the statement import for you. For this, you will need to generate a personal access token (PAT).
@@ -86,7 +73,7 @@
         <div>
             <div>
                 <label class="switch" for="auto-sync">
-                    Sync
+                    Sync with YNAB
                 </label>
                 <input type="checkbox" id="auto-sync">
             </div>
@@ -102,10 +89,14 @@
         <div id="ynab-connected">
             <h3>Success!</h3>
             <p>
-                We have made a connection with your YNAB! We also stored your PAT in this browser. So the next time you visit this site, you won't have to do this again.
+                We have made a connection with your YNAB account! We have stored your PAT in this browser. The next time you visit this site, you won't have to do this again.
             </p>
             <p>
-                We will ask you which budget and account should be used when you import a CSV file. We will try to remember the account you have chosen, the next time you use the website.
+                We will ask you which budget and account should be used when you import a CSV file. When you cancel the popup(s), you will have the option to download the CSV file.
+<!--                We will try to remember the account you have chosen, the next time you use the website.-->
+            </p>
+            <p>
+                Please note that only 100 calls can be made to the YNAB server every hour for every unique PAT.
             </p>
         </div>
     </div>
@@ -127,9 +118,11 @@
 <script src="js/accountData.js" async></script>
 <script src="js/bankMap.js" async></script>
 <script src="js/bankMapper.js" async></script>
-<script src="js/ynabConnect/ynabConnectUi.js" async></script>
+<script src="js/settingsStorage.js" async></script>
+<script src="js/ynabConnect/ynabSettings.js" async></script>
 <script src="js/ynabConnect/ynabConnect.js" async></script>
-<script src="js/ynabConnect/selectionPopup.js"></script>
+<script src="js/selectionPopup.js"></script>
+<script src="js/questionPopup.js"></script>
 <script src="js/convert.js" async></script>
 <script src="js/app.js" async></script>
 

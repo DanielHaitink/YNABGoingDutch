@@ -87,7 +87,7 @@ const BankMapper = function (bankMap, bank) {
             }
         }
 
-        return day + "-" + month + "-" + year;
+        return year + "-" + month + "-" + day;
     };
 
     /**
