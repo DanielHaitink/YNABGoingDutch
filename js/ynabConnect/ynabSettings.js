@@ -3,6 +3,7 @@ const YNABSettings = function (ynabConnect, ynabStorage) {
 	const invalidPatSpan = document.getElementById("pat-invalid");
 	const ynabConnectedDiv = document.getElementById("ynab-connected");
 	const testConnectionButton = document.getElementById("test-connection");
+	const clearPatButton = document.getElementById("clear-pat");
 	const patInput = document.getElementById("pat");
 	const syncInput = document.getElementById("auto-sync");
 
@@ -80,6 +81,12 @@ const YNABSettings = function (ynabConnect, ynabStorage) {
 					console.warn("Could not connect");
 				}
 			});
+		});
+
+		clearPatButton.addEventListener("click", function () {
+			ynabStorage.clearPat();
+			patInput.value = "";
+			ynabConnectedDiv.style.display = "none";
 		});
 
 		checkRetrieved();

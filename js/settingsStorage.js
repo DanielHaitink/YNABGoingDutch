@@ -13,6 +13,10 @@ const YNABSettingsStorage = function () {
 
     };
 
+    this.clearPat = () => {
+        window.localStorage.removeItem("pat");
+    }
+
     this.setPat = (pat) => {
         _pat = pat;
         window.localStorage.setItem("pat", _pat)
