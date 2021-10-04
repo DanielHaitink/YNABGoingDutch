@@ -1,3 +1,8 @@
+:root {
+    --background-color-light: #677380;
+    --background-color: #343a40;
+}
+
 body {
     position: relative;
     max-width: 600px;
@@ -123,6 +128,130 @@ footer {
 
 #content #drop-area.highlight {
     border-color: #d6a14d;
+}
+
+#settings-cog {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    font-size: 40px;
+}
+
+.fas:hover {
+    color: #d6a14d;
+}
+
+.fas:active {
+    color: #ffb300;
+}
+
+.highlight {
+    color: #d6a14d;
+    /*text-decoration: #d6a14d solid 2px underline;*/
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+#ynab-settings {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    /*max-width: 0px;*/
+    width: 300px;
+    display: none;
+    background: var(--background-color-light);
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+#pat {
+    width: 100%;
+}
+
+#ynab-settings-close {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    font-size: 30px;
+}
+
+#settings-content {
+    margin: 50px 20px;
+}
+
+#selection-popup,
+#question-popup{
+    /*position: fixed;*/
+
+
+    border-radius: 7px;
+    background: #57bf57;
+    margin: auto;
+    padding:40px;
+
+    position:absolute;
+    width:800px;
+    top: 50%;
+    left: 50%;
+    margin-left: -400px; // 1/2 width
+    margin-top: -40px; // 1/2 height
+}
+
+#selection-popup p,
+#question-popup p{
+    width: 100%;
+}
+#selection-popup select {
+    width: 100%;
+}
+
+#selection-popup button,
+#question-popup button{
+
+}
+
+.banner-container {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    position: absolute;
+    top: -5px;
+    left: -5px;
+}
+banner-container:after {
+     content: "";
+     display: block;
+     width: 10px;
+     height: 5px;
+     background-color: #69991c;
+     position: absolute;
+     top: 0;
+     right: 0;
+     z-index: -1;
+}
+banner-container:before {
+     content: "";
+     display: block;
+     height: 10px;
+     width: 5px;
+     background-color: #69991c;
+     position: absolute;
+     bottom: 0;
+     left: 0;
+     z-index: -1;
+}
+
+.banner {
+    width: 200px;
+    padding: 15px;
+    background-color: #76AB1E;
+    color: #fff;
+    text-align: center;
+    transform: rotate(-45deg) translate(-28%, -35%);
+    box-shadow: 0 5px 5px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    text-shadow: 0 2px 2px rgba(0,0,0,0.4);
 }
 
 @media screen and (max-width: 600px) {

@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="css/YNAB.css">
     <link rel="stylesheet" href="css/notie.min.css">
+    <link rel="stylesheet" href="css/fontawesome.min.css">
 
     <script type="javascript">
         if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
@@ -19,19 +20,27 @@
     </script>
 </head>
 <body>
+<div class="banner-container">
+    <div class="banner">WITH SYNC OPTION</div>
+</div>
+
 <header>
     <h1>YNAB Going Dutch</h1><br>
     <h3>Converts your Dutch bank statements from their CSV to YNAB CSV format</h3>
 </header>
 
+
 <div id="content">
     <div id="info">
         This tool is created to automatically convert your CSV bank files to a format that is used by <a href="https://youneedabudget.com">"You Need A Budget"</a>.
         <br><br>Your CSV will instantly download upon file selection.
-    </div>
+        <br><br>
+        <span class="highlight">NEW:</span> You can also configure this tool to synchronize directly with your YNAB account. Click on the options button in the upper right corner for more information.
+        This function is still in BETA, use it at your own risk. If you run into problems, please create an issue at <a href="https://github.com/danielswrath/YNABGoingDutch/issues">Github</a>
+	</div>
 
     <div id="drop-area">
-        <input id="drop-input" type="file" multiple onchange="parse()">
+        <input id="drop-input" type="file" multiple>
         <div id="drop-text">
             Drop your files in here!<br>Or click here to select files
         </div>
@@ -44,6 +53,60 @@
     </div>
 </div>
 
+<div id="settings-cog" alt="settings" about="settings">
+    <i class="fas fa-cog"></i>
+</div>
+
+<div id="ynab-settings">
+    <i id="ynab-settings-close" class="fas fa-times"></i>
+    <div id="settings-content">
+        <h2>
+            Settings (BETA)
+        </h2>
+        <p>
+            <b>These settings are actively developed and tested. Use them at your own risk.</b>
+        </p>
+        <p>
+            YNAB Going Dutch can automate the statement import for you. For this, you will need to generate a personal access token (PAT).
+        </p>
+        <p>
+            Visit <a href="https://api.youneedabudget.com/#personal-access-tokens" target="_blank">this link</a> to find out how to generate a PAT in YNAB.
+        </p>
+        <p>
+            When you have obtained a valid PAT, please paste it in the field below and click on the <i>test connection</i> button.
+        </p>
+        <div>
+            <div>
+                <label class="switch" for="auto-sync">
+                    Sync with YNAB
+                </label>
+                <input type="checkbox" id="auto-sync">
+            </div>
+            <label for="pat"></label><input id="pat" type="text" placeholder="PAT">
+            <input id="test-connection" type="button" name="test-connection" value="Test connection">
+            <input id="clear-pat" type="button" name="clear-pat" value="Clear PAT">
+<!--            <input id="export-settings" type="button" name="export-settings" value="Export settings">-->
+<!--            <input id="import-settings" type="button" name="import-settings" value="Import settings">-->
+        </div>
+        <div>
+            <span id="pat-invalid" class="hidden">Failed to connect to YNAB. Are you sure your PAT is correct?</span>
+        </div>
+        <div id="ynab-connected">
+            <h3>Success!</h3>
+            <p>
+                We have made a connection with your YNAB account! We have stored your PAT in this browser. The next time you visit this site, you won't have to do this again.
+            </p>
+            <p>
+                We will ask you which budget and account should be used when you import a CSV file. When you cancel the popup(s), you will have the option to download the CSV file.
+<!--                We will try to remember the account you have chosen, the next time you use the website.-->
+            </p>
+            <p>
+                Please note that only 100 calls can be made to the YNAB server every hour for every unique PAT.
+            </p>
+        </div>
+    </div>
+</div>
+
 <footer>
     <div class="center">
         Find the source on <a href="https://github.com/DanielsWrath/YNABGoingDutch">Github</a><br>
@@ -53,9 +116,20 @@
     </div>
 </footer>
 
-<script src="js/notie/notie.min.js"></script>
+<script src="https://unpkg.com/ynab@latest/dist/browser/ynab.js" async></script>
+<script src="js/notie/notie.min.js" async></script>
 <script src="js/dropArea.js"></script>
-<script src="js/CSVGood.js"></script>
-<script src="js/convert.js"></script>
+<script src="js/CSVGood.js" async></script>
+<script src="js/accountData.js" async></script>
+<script src="js/bankMap.js" async></script>
+<script src="js/bankMapper.js" async></script>
+<script src="js/settingsStorage.js" async></script>
+<script src="js/ynabConnect/ynabSettings.js" async></script>
+<script src="js/ynabConnect/ynabConnect.js" async></script>
+<script src="js/selectionPopup.js"></script>
+<script src="js/questionPopup.js"></script>
+<script src="js/convert.js" async></script>
+<script src="js/app.js" async></script>
+
 </body>
 </html>

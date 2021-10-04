@@ -12,17 +12,17 @@ const CSVGood = function (file, onStep, onError, onComplete) {
     let _firstLineParsed = false;
     let _incompleteRow = null;
 
-    const FileRow = function(data, error) {
+    const FileRow = function (data, error) {
         this.data = data;
         this.error = error;
     };
 
-    const FileStreamerResultStep = function(rows) {
+    const FileStreamerResultStep = function (rows) {
         this.fields = _header;
         this.rows = rows;
     };
 
-    const FileStreamerResultComplete = function() {
+    const FileStreamerResultComplete = function () {
         this.file = file;
         this.fields = _header;
     };
@@ -48,7 +48,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
         let cleanedFields = [];
 
         for (let field of fields) {
-            field = field.replace(/(\r\n|\n|\r)/gm,"");
+            field = field.replace(/(\r\n|\n|\r)/gm, "");
 
             if (field.endsWith(",") || field.endsWith(";"))
                 field = field.substring(0, field.length - 1);
@@ -143,7 +143,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
 
         const fields = splitLineToFields(line);
 
-        if (! isRowComplete(line, fields)) {
+        if (!isRowComplete(line, fields)) {
             _incompleteRow = line;
             return null;
         }
@@ -206,7 +206,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
 
             // Prepare for the second step
             loadedBytes += fileStepSize;
-            streamingProgress = (loadedBytes/totalFileSize) * 100;
+            streamingProgress = (loadedBytes / totalFileSize) * 100;
 
             if (loadedBytes <= totalFileSize) {
                 // Parse the next part
