@@ -31,7 +31,9 @@ const SelectionPopup = function (text, options, callback, acceptText = "accept",
 
         textElement.innerText = text;
         acceptButton.innerText = acceptText;
+        acceptButton.className = "button-border";
         cancelButton.innerText = cancelText;
+        cancelButton.className = "button-border";
 
         acceptButton.addEventListener("click", (event) => {
             callback(selection.value);
