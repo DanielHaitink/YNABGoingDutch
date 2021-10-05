@@ -39,7 +39,7 @@ For ABN AMRO support, please visit [YNABGoingDutch ABN AMRO edition](https://git
  If you want support for your bank, please create a github issue, or contact me some other way.
  You are also welcome to fork the repo and add support yourself! Please create a pull request if you want your code to be added.
 
-##Bugs and Problems
+## Bugs and Problems
 If you have any problems or issues while using YNABGoingDutch, please create an issue on this repository.
 
 ## Just let me use it!
