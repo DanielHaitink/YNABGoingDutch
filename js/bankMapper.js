@@ -190,6 +190,9 @@ BankMapper.DEFAULT_DATE_FORMAT = "YYYY-MM-DD";
  */
 BankMapper.recognizeBank = (bankMap, header) => {
     const areArraysEqual = (arrayOne, arrayTwo) => {
+        if (arrayOne == null || arrayTwo == null || arrayOne.length !== arrayTwo.length)
+            return false;
+
         for (let index = 0, itemOne, itemTwo; itemOne = arrayOne[index], itemTwo = arrayTwo[index]; ++index) {
             if (itemOne.toLowerCase() !== itemTwo.toLowerCase())
                 return false;
@@ -200,7 +203,9 @@ BankMapper.recognizeBank = (bankMap, header) => {
     // Check the header
     for (const key in bankMap.getMapping()) {
         if (bankMap.getMapping().hasOwnProperty(key)) {
-            if (areArraysEqual(header, bankMap.getMapping()[key].header)) {
+            if (!bankMap.getMapping()[key].hasOwnProperty("header"))
+                continue;
+            if (areArraysEqual(header, bankMap.getMapping()[key]["header"])) {
                 return new BankMapper(bankMap, key);
             }
         }

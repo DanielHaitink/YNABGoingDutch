@@ -296,5 +296,53 @@
     "positiveIndicator": "Credit",
     "negativeIndicator": "Debet",
     "separateIndicator": [3]
+  },
+  "KBC": {
+    "bankName": "KBC",
+    "header": [
+      "Rekeningnummer",
+      "Rubrieknaam",
+      "Naam",
+      "Munt",
+      "Afschriftnummer",
+      "Datum",
+      "Omschrijving",
+      "Valuta",
+      "Bedrag",
+      "Saldo",
+      "credit",
+      "debet",
+      "rekeningnummer tegenpartij",
+      "BIC tegenpartij",
+      "Naam tegenpartij",
+      "Adres tegenpartij",
+      "gestructureerde mededeling",
+      "Vrije mededeling"
+
+    ],
+    "account": [
+      "Rekeningnummer"
+    ],
+    "date": [
+      "Datum"
+    ],
+    "dateFormat": "DD/MM/YYYY",
+    "payee": [
+      "Omschrijving",
+      "Naam tegenpartij",
+      "rekeningnummer tegenpartij"
+    ],
+    "category": [],
+    "memo": [
+      "gestructureerde mededeling",
+      "Vrije mededeling"
+    ],
+    "outflow": [
+      "debet"
+    ],
+    "inflow": [
+      "credit"
+    ],
+    "negativeIndicator": "-"
   }
 }
