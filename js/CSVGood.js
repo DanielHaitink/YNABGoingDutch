@@ -50,6 +50,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
         for (let field of fields) {
             field = field.replace(/(\r\n|\n|\r)/gm, "");
 
+            // TODO: only remove , if the file is comma seperated! Could be part of a number
             if (field.endsWith(",") || field.endsWith(";"))
                 field = field.substring(0, field.length - 1);
 
@@ -63,6 +64,7 @@ const CSVGood = function (file, onStep, onError, onComplete) {
     };
 
     const splitLineToFields = (line) => {
+        // TODO: split on EITHER , or ;
         const splitFieldsRegex = /("(?:[^"]|"")*"|[^,|;"\n\r]*)(,|;|\r?\n|\r|(.+$))/g;
 
         let fields = line.match(splitFieldsRegex);

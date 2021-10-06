@@ -60,8 +60,10 @@ const Converter = function (bankMap, onConverted) {
         // Loop through all the data
         for (let index = 0, line; line = results.rows[index]; ++index) {
             // check for error
-            if (line.error !== null)
+            if (line.error !== null) {
+                console.error("Error in line: " + String(line.error))
                 continue;
+            }
 
             convertLine(line.data);
         }
@@ -95,14 +97,7 @@ const Converter = function (bankMap, onConverted) {
         const keys = Object.keys(_accounts);
 
         for (let index = 0, account; account = _accounts[keys[index]]; ++index) {
-            // TODO: if connected to YNAB and user wants to connect, generate YNAB transactions
-            // IF using the PAT, show one account and wait for user input.
-
             onConverted(_accounts)
-
-            // new SelectionPopup("Test", ["a", "b", "c"], (e) => console.log(e));
-
-            // account.downloadCSV();
         }
     };
 
