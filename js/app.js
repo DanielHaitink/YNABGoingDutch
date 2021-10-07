@@ -131,5 +131,3 @@ const App = function () {
 };
 
 window.addEventListener("load", () => new App());
-
-new SelectionPopup("Which account?", [0,1,2,3,4], (e) => console.log(e));
