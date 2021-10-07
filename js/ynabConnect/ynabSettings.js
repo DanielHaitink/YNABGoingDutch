@@ -21,14 +21,15 @@ const YNABSettings = function (ynabConnect, ynabStorage) {
      * Show the settings panel.
      */
     this.showYnabSettings = function () {
-        ynabSettingsDiv.style.display = "block";
+        // ynabSettingsDiv.style.display = "block";
+        ynabSettingsDiv.classList.add("active");
     };
 
     /**
      * Hide the settings panel.
      */
     const hideYnabSettings = function () {
-        ynabSettingsDiv.style.display = "none";
+        ynabSettingsDiv.classList.remove("active");
     };
 
     const testConnection = async function () {
