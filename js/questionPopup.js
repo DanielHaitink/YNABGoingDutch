@@ -21,7 +21,9 @@ const QuestionPopup = function (text, callback, acceptText = "Yes", rejectText =
 
         textElement.innerText = text;
         acceptButton.innerText = acceptText;
+        acceptButton.className = "button-border";
         rejectButton.innerText = rejectText;
+        rejectButton.className = "button-border";
 
         acceptButton.addEventListener("click", (event) => {
             callback(true);
@@ -34,8 +36,8 @@ const QuestionPopup = function (text, callback, acceptText = "Yes", rejectText =
         });
 
         element.append(textElement);
-        element.append(rejectButton);
         element.append(acceptButton)
+        element.append(rejectButton);
         document.body.append(element);
     };
 

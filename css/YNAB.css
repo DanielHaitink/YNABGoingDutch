@@ -1,17 +1,28 @@
 :root {
-    --background-color-light: #677380;
-    --background-color: #343a40;
+    --background-color-light: #425266;
+    --background-color: #292F36;
+    --text-color-dark: #0f0f0f;
+    --text-color-white: #fafafa;
+
+    --drop-area-color: #cccccc;
+
+    --highlight: #F08700;
+    --theme-color-1: #0496FF;
+    --theme-color-1-light: #0090ff;
+    --theme-color-2: #D8315B;
+    --theme-color-2-dark: #801d36;
+    --theme-color-2-light: #f23866;
 }
 
 body {
     position: relative;
-    max-width: 600px;
     min-height: 100vh;
-    margin: auto;
-    background-color: #343a40;
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    color: white;
-    font-weight: lighter;
+    background-color: var(--background-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: var(--text-color-white);
+    /*font-weight: lighter;*/
+    margin: 0;
+    overflow-x: hidden;
 }
 
 h1 {
@@ -36,19 +47,19 @@ a {
 }
 
 a:link {
-    color: navajowhite;
+    color: var(--theme-color-1);
 }
 
 a:visited {
-    color: navajowhite;
+    color: var(--theme-color-1);
 }
 
 a:hover {
-    color: white;
+    color: var(--text-color-white);
 }
 
 a:active {
-    color: white;
+    color: var(--text-color-white);
 }
 
 header {
@@ -58,6 +69,8 @@ header {
 
 #content {
     padding-bottom: 55px;
+    max-width: 600px;
+    margin: auto;
 }
 
 footer {
@@ -94,8 +107,8 @@ footer {
 
 #content #drop-area {
     position: relative;
-    border: 2px dashed #ccc;
-    color: #ccc;
+    border: 2px dashed var(--drop-area-color);
+    color: var(--drop-area-color);
     line-height: 30px;
     border-radius: 20px;
     width: 500px;
@@ -104,13 +117,13 @@ footer {
     display: table;
 }
 
-#content #drop-area #drop-text{
+#content #drop-area #drop-text {
     text-align: center;
     vertical-align: middle;
     display: table-cell;
 }
 
-#content #drop-area #drop-input{
+#content #drop-area #drop-input {
     position: absolute;
     padding: 0;
     margin: 0;
@@ -122,39 +135,74 @@ footer {
 }
 
 #content #drop-area:hover {
-    border-color: white;
-    color: white;
+    border-color: var(--text-color-white);
+    color: var(--text-color-white);
 }
 
 #content #drop-area.highlight {
-    border-color: #d6a14d;
+    border-color: var(--highlight);
 }
 
 #settings-cog {
-    position: fixed;
+    position: absolute;
     right: 20px;
     top: 20px;
     font-size: 40px;
 }
 
+#settings-cog .fas:hover {
+    transform: rotate(90deg);
+    transition: transform 400ms;
+}
+
 .fas:hover {
-    color: #d6a14d;
+    color: var(--highlight);
 }
 
 .fas:active {
-    color: #ffb300;
+    color: var(--highlight);
 }
 
 .highlight {
-    color: #d6a14d;
+    color: var(--highlight);
     /*text-decoration: #d6a14d solid 2px underline;*/
     font-size: 20px;
     font-weight: bolder;
 }
 
+/* Button */
+
+.button-border {
+    all: unset;
+    display: inline-block;
+    padding: 0.35em 1.2em;
+    border: 0.1em solid var(--text-color-white);
+    margin: 0 0.3em 0.3em 0;
+    border-radius: 0.12em;
+    box-sizing: border-box;
+    text-decoration: none;
+    font-weight: 300;
+    color: var(--text-color-white);
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.button-border:hover {
+    color: var(--background-color);
+    background-color: var(--text-color-white);
+}
+
+.button-border:active {
+    color: var(--text-color-white);
+    border-color: var(--background-color);
+    background-color: var(--background-color);
+}
+
+/* Settings */
+
 #ynab-settings {
-    position: fixed;
-    right: 0;
+    position: absolute;
+    right: -300px;
     top: 0;
     height: 100%;
     /*max-width: 0px;*/
@@ -165,51 +213,90 @@ footer {
     border-top-left-radius: 10px;
 }
 
-#pat {
+#ynab-settings a {
+    color: var(--highlight);
+}
+
+#ynab-settings a:hover {
+    color: var(--text-color-white);
+}
+
+#ynab-settings .button-border {
     width: 100%;
 }
 
+#ynab-settings input[type="text"] {
+    all: unset;
+    width: 100%;
+    margin: 5px 0;
+    background: var(--text-color-white);
+    color: var(--text-color-dark);
+    border-radius: 0.12em;
+    padding: 0.35em 0;
+    /*border: 0.1em solid var(--text-color-dark);*/
+}
+
+#ynab-settings.hidden {
+    -webkit-animation: left-to-right 200ms linear forwards;
+    animation: left-to-right 200ms linear forwards;
+}
+
+#ynab-settings.active {
+    display: block;
+    -webkit-animation: right-to-left 200ms linear forwards;
+    animation: right-to-left 200ms linear forwards;
+}
+
+#pat {
+    width: 100%;
+    margin: 4px 0;
+}
+
 #ynab-settings-close {
-    position: fixed;
+    position: absolute;
     right: 20px;
     top: 20px;
     font-size: 30px;
 }
 
 #settings-content {
+    /*color: var(--text-color-dark);*/
     margin: 50px 20px;
 }
 
 #selection-popup,
-#question-popup{
-    /*position: fixed;*/
-
-
+#question-popup {
+    display: flex;
+    flex-wrap: wrap;
     border-radius: 7px;
-    background: #57bf57;
-    margin: auto;
-    padding:40px;
-
-    position:absolute;
-    width:800px;
+    background: var(--background-color-light);
+    border: 0.1em solid var(--text-color-white);
+    padding: 40px;
+    position: absolute;
+    width: 400px;
     top: 50%;
     left: 50%;
-    margin-left: -400px; // 1/2 width
-    margin-top: -40px; // 1/2 height
+    margin: -40px auto auto -240px;
 }
 
 #selection-popup p,
-#question-popup p{
+#question-popup p {
     width: 100%;
+    text-align: center;
+    margin-bottom: 30px;
 }
+
 #selection-popup select {
     width: 100%;
+    margin-bottom: 10px;
 }
 
 #selection-popup button,
-#question-popup button{
-
+#question-popup button {
+    flex: 1;
 }
+
+/* Banner */
 
 .banner-container {
     width: 200px;
@@ -219,39 +306,41 @@ footer {
     top: -5px;
     left: -5px;
 }
+
 banner-container:after {
-     content: "";
-     display: block;
-     width: 10px;
-     height: 5px;
-     background-color: #69991c;
-     position: absolute;
-     top: 0;
-     right: 0;
-     z-index: -1;
+    content: "";
+    display: block;
+    width: 10px;
+    height: 5px;
+    background-color: var(--theme-color-1-light);
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: -1;
 }
+
 banner-container:before {
-     content: "";
-     display: block;
-     height: 10px;
-     width: 5px;
-     background-color: #69991c;
-     position: absolute;
-     bottom: 0;
-     left: 0;
-     z-index: -1;
+    content: "";
+    display: block;
+    height: 10px;
+    width: 5px;
+    background-color: var(--theme-color-1-light);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
 }
 
 .banner {
     width: 200px;
     padding: 15px;
-    background-color: #76AB1E;
+    background-color: var(--theme-color-1);
     color: #fff;
     text-align: center;
     transform: rotate(-45deg) translate(-28%, -35%);
-    box-shadow: 0 5px 5px rgba(0,0,0,0.4);
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.4);
     text-transform: uppercase;
-    text-shadow: 0 2px 2px rgba(0,0,0,0.4);
+    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
 }
 
 @media screen and (max-width: 600px) {
@@ -278,5 +367,50 @@ banner-container:before {
 @media screen and (max-width: 400px) {
     #content {
         padding-bottom: 100px;
+    }
+}
+
+@media all and (max-width: 30em) {
+    .button-border {
+        display: block;
+        margin: 0.4em auto;
+    }
+}
+
+@-webkit-keyframes left-to-right {
+    from {
+        right: 0
+    }
+    to {
+        right: -300px
+    }
+}
+
+@-webkit-keyframes right-to-left {
+    from {
+        right: -300px
+    }
+    to {
+        right: 0;
+        display: none
+    }
+}
+
+@keyframes left-to-right {
+    from {
+        right: 0
+    }
+    to {
+        right: -300px;
+        display: none
+    }
+}
+
+@keyframes right-to-left {
+    from {
+        right: -300px
+    }
+    to {
+        right: 0
     }
 }
