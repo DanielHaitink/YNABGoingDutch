@@ -185,6 +185,7 @@ footer {
     color: var(--text-color-white);
     text-align: center;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .button-border:hover {
