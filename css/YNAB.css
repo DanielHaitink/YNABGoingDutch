@@ -1,8 +1,10 @@
 :root {
-    --background-color-light: #8c8c8c;
+    --background-color-light: #425266;
     --background-color: #292F36;
     --text-color-dark: #0f0f0f;
     --text-color-white: #fafafa;
+
+    --drop-area-color: #cccccc;
 
     --highlight: #F08700;
     --theme-color-1: #0496FF;
@@ -18,7 +20,7 @@ body {
     background-color: var(--background-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: var(--text-color-white);
-    font-weight: lighter;
+    /*font-weight: lighter;*/
     margin: 0;
     overflow-x: hidden;
 }
@@ -53,11 +55,11 @@ a:visited {
 }
 
 a:hover {
-    color: var(--theme-color-1-light);
+    color: var(--text-color-white);
 }
 
 a:active {
-    color: white;
+    color: var(--text-color-white);
 }
 
 header {
@@ -105,8 +107,8 @@ footer {
 
 #content #drop-area {
     position: relative;
-    border: 2px dashed var(--background-color-light);
-    color: var(--background-color-light);
+    border: 2px dashed var(--drop-area-color);
+    color: var(--drop-area-color);
     line-height: 30px;
     border-radius: 20px;
     width: 500px;
@@ -168,34 +170,7 @@ footer {
     font-weight: bolder;
 }
 
-#ynab-settings {
-    position: absolute;
-    right: -300px;
-    top: 0;
-    height: 100%;
-    /*max-width: 0px;*/
-    width: 300px;
-    display: none;
-    background: var(--background-color-light);
-    border-bottom-left-radius: 10px;
-    border-top-left-radius: 10px;
-}
-
-#ynab-settings.hidden {
-    -webkit-animation: left-to-right 200ms linear forwards;
-    animation: left-to-right 200ms linear forwards;
-}
-
-#ynab-settings.active {
-    display: block;
-    -webkit-animation: right-to-left 200ms linear forwards;
-    animation: right-to-left 200ms linear forwards;
-}
-
-#pat {
-    width: 100%;
-    margin: 4px 0;
-}
+/* Button */
 
 .button-border {
     all: unset;
@@ -223,6 +198,60 @@ footer {
     background-color: var(--background-color);
 }
 
+/* Settings */
+
+#ynab-settings {
+    position: absolute;
+    right: -300px;
+    top: 0;
+    height: 100%;
+    /*max-width: 0px;*/
+    width: 300px;
+    display: none;
+    background: var(--background-color-light);
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+#ynab-settings a {
+    color: var(--highlight);
+}
+
+#ynab-settings a:hover {
+    color: var(--text-color-white);
+}
+
+#ynab-settings .button-border {
+    width: 100%;
+}
+
+#ynab-settings input[type="text"] {
+    all: unset;
+    width: 100%;
+    margin: 5px 0;
+    background: var(--text-color-white);
+    color: var(--text-color-dark);
+    border-radius: 0.12em;
+    padding: 0.35em 0;
+    /*border: 0.1em solid var(--text-color-dark);*/
+}
+
+#ynab-settings.hidden {
+    -webkit-animation: left-to-right 200ms linear forwards;
+    animation: left-to-right 200ms linear forwards;
+}
+
+#ynab-settings.active {
+    display: block;
+    -webkit-animation: right-to-left 200ms linear forwards;
+    animation: right-to-left 200ms linear forwards;
+}
+
+#pat {
+    width: 100%;
+    margin: 4px 0;
+}
+
 #ynab-settings-close {
     position: absolute;
     right: 20px;
@@ -240,13 +269,14 @@ footer {
     display: flex;
     flex-wrap: wrap;
     border-radius: 7px;
-    background: var(--theme-color-2);
+    background: var(--background-color-light);
+    border: 0.1em solid var(--text-color-white);
     padding: 40px;
     position: absolute;
     width: 400px;
     top: 50%;
     left: 50%;
-    margin: -40px auto auto -200px;
+    margin: -40px auto auto -240px;
 }
 
 #selection-popup p,
