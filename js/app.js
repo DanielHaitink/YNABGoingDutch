@@ -68,7 +68,7 @@ const App = function () {
             );
         };
 
-        const chooseAccount = (budget, accountData) => {
+        const chooseAccount = (budget, accountData, accountName) => {
             if (budget == null)
                 return fallbackPopup(accountData);
 
@@ -80,7 +80,7 @@ const App = function () {
 
                     const accountNames = [];
                     accounts.forEach(e => accountNames.push(e.getName()));
-                    new SelectionPopup("Which account?", accountNames, (e) => syncAccount(accounts[e], accountData));
+                    new SelectionPopup("Which account for " + accountName + "?", accountNames, (e) => syncAccount(accounts[e], accountData));
                 }
             )
         };
@@ -97,7 +97,7 @@ const App = function () {
 
                         const budgetNames = [];
                         budgets.forEach(e => budgetNames.push(e.getName()))
-                        new SelectionPopup("Which budget?", budgetNames, (e) => chooseAccount(budgets[e], value));
+                        new SelectionPopup("Which budget for " + key + "?", budgetNames, (e) => chooseAccount(budgets[e], value, key));
                     }
                 );
             } else {
