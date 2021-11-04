@@ -79,8 +79,24 @@ const App = function () {
                         return fallbackPopup(accountData);
 
                     const accountNames = [];
-                    accounts.forEach(e => accountNames.push(e.getName()));
-                    new SelectionPopup("Which account for " + accountName + "?", accountNames, (e) => syncAccount(accounts[e], accountData));
+                    const closed = [];
+                    const tracking = [];
+                    const onBudget = [];
+                    accounts.forEach((e, i) => {
+                        accountNames.push(e.getName());
+
+                        if (e.isClosed())
+                            closed.push(i)
+                        else if (!e.isOnBudget())
+                            tracking.push(i);
+                        else
+                            onBudget.push(i);
+                    });
+
+
+                    new SelectionPopup("Which account for " + accountName + "?", accountNames,
+                        (e) => syncAccount(accounts[e], accountData),
+                        {"Budget": onBudget, "Tracking": tracking, "Closed": closed});
                 }
             )
         };
