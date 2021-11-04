@@ -163,6 +163,10 @@ const YNABAccount = function (account, budget) {
 
     this.getName = () => account.name;
 
+    this.isOnBudget = () => account.on_budget;
+
+    this.isClosed = () => account.closed;
+
     this.createTransaction = async function (transaction) {
         try {
             const jsonTransaction = transaction.getYNABTransaction(1);
