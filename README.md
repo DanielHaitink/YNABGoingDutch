@@ -7,7 +7,7 @@ The system will split unique account numbers in different output files.
 
 Everything is done locally. Your information never leaves your own computer.
 
-## Automated synchronisation (BETA)
+## Automated synchronisation
 YNABGoingDutch supports automated synchronisation with your YNAB account. Note that this functionality is still under construction!
 
 To use this feature you need to do the following:
@@ -43,4 +43,4 @@ For ABN AMRO support, please visit [YNABGoingDutch ABN AMRO edition](https://git
 If you have any problems or issues while using YNABGoingDutch, please create an issue on this repository.
 
 ## Just let me use it!
-The latest version of the master branch can be used on [GitHub Pages](https://danielswrath.github.io/YNABGoingDutch). 
+The latest version of the master branch can be used on [GitHub Pages](https://danielswrath.github.io/YNABGoingDutch).
