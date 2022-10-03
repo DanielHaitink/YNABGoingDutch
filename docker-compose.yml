@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+    app:
+        container_name: ynabgoingdutch
+        image: ynabgoingdutch
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                SYNC:
+                PAT:
+        restart: always
+        ports:
+            - "8080:8080"

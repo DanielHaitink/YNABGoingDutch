@@ -44,3 +44,10 @@ If you have any problems or issues while using YNABGoingDutch, please create an 
 
 ## Just let me use it!
 The latest version of the master branch can be used on [GitHub Pages](https://danielswrath.github.io/YNABGoingDutch).
+
+### Docker
+A Dockerfile and docker-compose.yml is added, which can be used to run the project locally and set the PAT as environment variable. Copy .env-example to .env and add your PAT and run:
+
+``docker compose up --build``
+
+Now the application will be available in your browser on http://localhost:8080
