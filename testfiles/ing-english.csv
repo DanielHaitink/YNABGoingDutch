@@ -1,0 +1,4 @@
+"Date";"Name / Description";"Account";"Counterparty";"Code";"Debit/credit";"Amount (EUR)";"Transaction type";"Notifications";"Resulting balance";"Tag"
+"20240426";"Some payee somewhere";"NL76INGB0123456789";"DE2134567890123456789";"ID";"Debit";"45,14";"iDEAL";"Name: Transaction Description";"1,46";""
+"20240426";"Another payee";"NL76INGB0123456789";"";"BA";"Debit";"40,18";"Payment terminal";"Terminal Transaction Description";"46,60";""
+"20240426";"Some more payee";"NL76INGB0123456789";"";"BA";"Debit";"8,75";"Payment terminal";"One more trasnsaction Description";"86,78";""

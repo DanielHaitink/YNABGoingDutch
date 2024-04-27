@@ -212,6 +212,46 @@
       "Af Bij"
     ]
   },
+  "ING Bank English": {
+    "bankName": "INGB",
+    "header": [
+      "Date",
+      "Name / Description",
+      "Account",
+      "Counterparty",
+      "Code",
+      "Debit/credit",
+      "Amount (EUR)",
+      "Transaction type",
+      "Notifications"
+    ],
+    "account": [
+      "Account"
+    ],
+    "date": [
+      "Date"
+    ],
+    "dateFormat": "YYYYMMDD",
+    "payee": [
+      "Name / Description",
+      "Account"
+    ],
+    "category": [],
+    "memo": [
+      "Notifications"
+    ],
+    "outflow": [
+      "Amount (EUR)"
+    ],
+    "inflow": [
+      "Amount (EUR)"
+    ],
+    "positiveIndicator": "Credit",
+    "negativeIndicator": "Debit",
+    "separateIndicator": [
+      "Debit/credit"
+    ]
+  },
   "ING Bank Bonusrenterekening": {
     "bankName": "INGB",
     "header": [
