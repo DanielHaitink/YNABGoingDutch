@@ -234,7 +234,7 @@
     "dateFormat": "YYYYMMDD",
     "payee": [
       "Name / Description",
-      "Account"
+      "Counterparty"
     ],
     "category": [],
     "memo": [
