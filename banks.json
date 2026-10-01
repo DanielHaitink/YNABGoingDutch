@@ -85,7 +85,6 @@
       "Type betaling",
       "Machtigingsnummer",
       "Incassant ID",
-      "Adres",
       "Referentie",
       "Boekdatum",
       ""
@@ -111,8 +110,8 @@
     "inflow": [
       "Bedrag"
     ],
-    "positiveIndicator": "C",
-    "negativeIndicator": "D",
+    "positiveIndicator": "Bijschrijving",
+    "negativeIndicator": "Afschrijving",
     "separateIndicator": ["CreditDebet"]
   },
   "Rabobank": {
