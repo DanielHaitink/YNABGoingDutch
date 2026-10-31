@@ -298,7 +298,7 @@ const Transaction = function (account, payee, date, amount, memo) {
             account_id: account.getId(),
             category_id: null,
             payee_name: payee.getName(),
-            cleared: window.ynab.SaveTransaction.ClearedEnum.Uncleared,
+            cleared: window.ynab?.SaveTransaction?.ClearedEnum?.Uncleared ?? 'uncleared',
             approved: true,
             date: date, // YYYY-MM-DD
             amount: amount,
